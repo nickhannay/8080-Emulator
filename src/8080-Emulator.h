@@ -2,6 +2,8 @@
 #define _8080_EMULATOR_H
 
 #include "shared.h"
+#include <stdint.h>
+#include <stddef.h>
 
 
 struct ConditionCodes{
@@ -29,9 +31,15 @@ typedef struct State8080 {
 } State8080;
 
 
+State8080* emulator_Init();
 
-int executeOp(State8080* state, byte opcode);
-int emulate8080(State8080* state);
+int emulator_Load(State8080* emu, const char* file);
+
+int emulator_Start(State8080* state);
+
+int emulator_executeOp(State8080* state, byte opcode);
+
+void emulator_Terminate(State8080* emu);
 
 
 

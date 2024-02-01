@@ -7,13 +7,43 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 
-int emulate8080(State8080* p_state){
+State8080* emulator_Init(){
+    State8080* emu = calloc(1, sizeof(State8080));
+    emu -> memory = calloc(65536 , sizeof(byte));
+
+    return emu;
+}
+
+
+int emulator_Load(State8080* emu, const char* file){
+    int fd = open(file, O_RDONLY);
+    int bytes_read = read(fd, emu -> memory, 65536);
+
+    close(fd);
+
+    return bytes_read;
+}
+
+
+void emulator_Terminate(State8080* emu){
+    free(emu -> memory);
+    free(emu);
+}
+
+
+
+
+int emulator_Start(State8080* p_state){
     while(true){
         byte opcode = p_state->memory[p_state->pc];
+
         
-        executeOp(p_state, opcode);
+        emulator_executeOp(p_state, opcode);
     }
     
     return 0;
@@ -23,7 +53,7 @@ int emulate8080(State8080* p_state){
 
 
 
-int executeOp(State8080* p_state, byte opcode){
+int emulator_executeOp(State8080* p_state, byte opcode){
     p_state -> pc += 1;
     
     switch(opcode){
@@ -39,7 +69,6 @@ int executeOp(State8080* p_state, byte opcode){
     case 0x03:
         break;
     case 0x04:
-        printf("INR B\n");
         break;
     case 0x05:
         op_DCR(p_state, opcode);
@@ -49,7 +78,6 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x07:
-        printf("RLC\n");
         break;
     case 0x08:
         // unsupported
@@ -61,10 +89,8 @@ int executeOp(State8080* p_state, byte opcode){
         op_LDAX(p_state, opcode);
         break;
     case 0x0b:
-        printf("DCX B\n");
         break;
     case 0x0c:
-        printf("INR C\n");
         break;
     case 0x0d:
         op_DCR(p_state, opcode);
@@ -90,7 +116,6 @@ int executeOp(State8080* p_state, byte opcode){
         op_INX(p_state, opcode);
         break;
     case 0x14:
-        printf("INR D\n");
         break;
     case 0x15:
         op_DCR(p_state, opcode);
@@ -100,7 +125,6 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x17:
-        printf("RAL");
         break;
     case 0x18:
         // unsupported 
@@ -112,10 +136,8 @@ int executeOp(State8080* p_state, byte opcode){
         op_LDAX(p_state, opcode);
         break;
     case 0x1b:
-        printf("DCX D\n");
         break;
     case 0x1c:
-        printf("INR E\n");
         break;
     case 0x1d:
         op_DCR(p_state, opcode);
@@ -125,25 +147,20 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x1f:
-        printf("RAR\n");
         break;
     case 0x20:
-        printf("RIM\n");
         break;
     case 0x21:
         op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x22:
-        //printf("SHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
-        //printf("\n\ncpdes[index + 1] = %02x ---- codes[index+2] = %02x\n\n", codes[index + 1], codes[index + 2]);
         p_state -> pc += 2;
         break;
     case 0x23:
         op_INX(p_state, opcode);
         break;
     case 0x24:
-        printf("INR H\n");
         break;
     case 0x25:
         op_DCR(p_state, opcode);
@@ -153,7 +170,6 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x27:
-        printf("DAA\n");
         break;
     case 0x28:
         // unsupported
@@ -162,14 +178,11 @@ int executeOp(State8080* p_state, byte opcode){
         op_DAD(p_state, opcode);
         break;
     case 0x2a:
-        //printf("LHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0x2b:
-        printf("DCX H\n");
         break;
     case 0x2c:
-        printf("INR L\n");
         break;
     case 0x2d:
         op_DCR(p_state, opcode);
@@ -179,10 +192,8 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x2f:
-        printf("CMA");
         break;
     case 0x30:
-        printf("SIM");
         break;
     case 0x31:
         op_LXI(p_state, opcode);
@@ -196,7 +207,6 @@ int executeOp(State8080* p_state, byte opcode){
         op_INX(p_state, opcode);
         break;
     case 0x34:
-        printf("INR M\n");
         break;
     case 0x35:
         op_DCR(p_state, opcode);
@@ -206,7 +216,6 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x37:
-        printf("STC\n");
         break;
     case 0x38:
         // unsupported
@@ -219,10 +228,8 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0x3b:
-        printf("DCX SP\n");
         break;
     case 0x3c:
-        printf("INR A\n");
         break;
     case 0x3d:
         op_DCR(p_state, opcode);
@@ -232,7 +239,6 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0x3f:
-        printf("CMC\n");
         break;
     case 0x40:
     case 0x41:
@@ -291,7 +297,6 @@ int executeOp(State8080* p_state, byte opcode){
         op_MOV(p_state, opcode);
         break;
     case 0x76:
-        printf("HLT\n");
         break;
     case 0x77:
     case 0x78:
@@ -305,100 +310,68 @@ int executeOp(State8080* p_state, byte opcode){
         op_MOV(p_state, opcode);
         break;
     case 0x80:
-        printf("ADD B\n");
         break;
     case 0x81:
-        printf("ADD C\n");
         break;
     case 0x82:
-        printf("ADD D\n");
         break;
     case 0x83:
-        printf("ADD E\n");
         break;
     case 0x84:
-        printf("ADD H\n");
         break;
     case 0x85:
-        printf("ADD L\n");
         break;
     case 0x86:
-        printf("ADD M\n");
         break;
     case 0x87:
-        printf("ADD A\n");
         break;
     case 0x88:
-        printf("ADC B\n");
         break;
     case 0x89:
-        printf("ADC C\n");
         break;
     case 0x8a:
-        printf("ADC D\n");
         break;
     case 0x8b:
-        printf("ADC E\n");
         break;
     case 0x8c:
-        printf("ADC H\n");
         break;
     case 0x8d:
-        printf("ADC L\n");
         break;
     case 0x8e:
-        printf("ADC M\n");
         break;
     case 0x8f:
-        printf("ADC A\n");
         break;
     case 0x90:
-        printf("SUB B\n");
         break;
     case 0x91:
-        printf("SUB C\n");
         break;
     case 0x92:
-        printf("SUB D\n");
         break;
     case 0x93:
-        printf("SUB E\n");
         break;
     case 0x94:
-        printf("SUB H\n");
         break;
     case 0x95:
-        printf("SUB L\n");
         break;
     case 0x96:
-        printf("SUB M\n");
         break;
     case 0x97:
-        printf("SUB A\n");
         break;
     case 0x98:
-        printf("SBB B\n");
         break;
     case 0x99:
-        printf("SBB C\n");
         break;
     case 0x9a:
-        printf("SBB D\n");
         break;
     case 0x9b:
-        printf("SBB E\n");
         break;
     case 0x9c:
-        printf("SBB H\n");
         break;
     case 0x9d:
-        printf("SBB L\n");
         break;
     case 0x9e:
-        printf("SBB M\n");
         break;
     case 0x9f:
-        printf("SBB A\n");
         break;
     case 0xa0:
     case 0xa1:
@@ -421,55 +394,38 @@ int executeOp(State8080* p_state, byte opcode){
         op_XRA(p_state, opcode);
         break;
     case 0xb0:
-        printf("ORA B\n");
         break;
     case 0xb1:
-        printf("ORA C\n");
         break;
     case 0xb2:
-        printf("ORA D\n");
         break;
     case 0xb3:
-        printf("ORA E\n");
         break;
     case 0xb4:
-        printf("ORA H\n");
         break;
     case 0xb5:
-        printf("ORA L\n");
         break;
     case 0xb6:
-        printf("ORA M\n");
         break;
     case 0xb7:
-        printf("ORA A\n");
         break;
     case 0xb8:
-        printf("CMP B\n");
         break;
     case 0xb9:
-        printf("CMP C\n");
         break;
     case 0xba:
-        printf("CMP D\n");
         break;
     case 0xbb:
-        printf("CMP E\n");
         break;
     case 0xbc:
-        printf("CMP H\n");
         break;
     case 0xbd:
-        printf("CMP L\n");
         break;
     case 0xbe:
-        printf("CMP M\n");
         break;
     case 0xbf:
-        printf("CMP A\n");
         break;
     case 0xc0:
-        printf("RNZ\n");
         break;
     case 0xc1:
         op_POP(p_state, opcode);
@@ -481,7 +437,6 @@ int executeOp(State8080* p_state, byte opcode){
         op_JMP(p_state, opcode);
         break;
     case 0xc4:
-        //printf("CNZ %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xc5:
@@ -492,43 +447,36 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0xc7:
-        printf("RST 0\n");
         break;
     case 0xc8:
-        printf("RZ\n");
         break;
     case 0xc9:
         op_RET(p_state, opcode);
         break;
     case 0xca:
-        //printf("JZ %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xcb:
         // not supported
         break;
     case 0xcc:
-        //printf("CZ %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xcd:
         op_CALL(p_state, opcode);
         break;
     case 0xce:
-        //printf("ACI %02x\n", codes[index + 1]);
+        
         p_state -> pc += 1;
         break;
     case 0xcf:
-        printf("RST 1\n");
         break;
     case 0xd0:
-        printf("RNC\n");
         break;
     case 0xd1:
         op_POP(p_state, opcode);
         break;
     case 0xd2:
-        //printf("JNC %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xd3:
@@ -536,62 +484,51 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0xd4:
-        //printf("CNC %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xd5:
         op_PUSH(p_state, opcode);
         break;
     case 0xd6:
-        //printf("SUI %02x\n", codes[index + 1]);
+        
         p_state -> pc += 2;
         break;
     case 0xd7:
-        printf("RST 2\n");
         break;
     case 0xd8:
-        printf("RC\n");
         break;
     case 0xd9:
         // not supported
         break;
     case 0xda:
-        //printf("JC %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xdb:
-        //printf("IN %02x\n", codes[index + 1]);
         p_state -> pc += 1;
         break;
     case 0xdc:
-        //printf("CC %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xdd:
         // not supported
         break;
     case 0xde:
-        //printf("SBI %02x\n", codes[index + 1]);
+        
         p_state -> pc += 1;
         break;
     case 0xdf:
-        printf("RST 3\n");
         break;
     case 0xe0:
-        printf("RPO\n");
         break;
     case 0xe1:
         op_POP(p_state, opcode);
         break;
     case 0xe2:
-        //printf("JPO %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xe3:
-        printf("XTHL\n");
         break;
     case 0xe4:
-        //printf("CPO %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xe5:
@@ -602,44 +539,35 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 1;
         break;
     case 0xe7:
-        printf("RST 4\n");
         break;
     case 0xe8:
-        printf("RPE\n");
         break;
     case 0xe9:
-        printf("PCHL\n");
         break;
     case 0xea:
-        //printf("JPE %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xeb:
         op_XCHG(p_state, opcode);
         break;
     case 0xec:
-        //printf("CPE %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xed:
         // not supported
         break;
     case 0xee:
-        //printf("XRI %02x\n", codes[index + 1]);
+        
         p_state -> pc += 1;
         break;
     case 0xef:
-        printf("RST 5\n");
         break;
     case 0xf0:
-        printf("RP\n");
         break;
     case 0xf1:
-        printf("POP PSW\n");
-        // need to handle flags for special case 
+        op_POP(p_state, opcode);
         break;
     case 0xf2:
-        //printf("JP %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xf3:
@@ -647,46 +575,37 @@ int executeOp(State8080* p_state, byte opcode){
         op_setI(p_state, 0);
         break;
     case 0xf4:
-        //printf("CP %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xf5:
-        printf("PUSH PSW\n");
         break;
     case 0xf6:
-        //printf("ORI %02x\n", codes[index + 1]);
+        
         p_state -> pc += 1;
         break;
     case 0xf7:
-        printf("RST 6\n");
         break;
     case 0xf8:
-        printf("RM\n");
         break;
     case 0xf9:
-        printf("SPHL\n");
         break;
     case 0xfa:
-        //printf("JM %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xfb:
-        // enable interrupts
+        // Enable Interrupts
         op_setI(p_state, 1);
         break;
     case 0xfc:
-        //printf("CM %02x%02x\n", codes[index + 2], codes[index + 1]);
         p_state -> pc += 2;
         break;
     case 0xfd:
         // not supported
         break;
     case 0xfe:
-        //printf("CPI %02x\n", codes[index + 1]);
         p_state -> pc += 1;
         break;
     case 0xff:
-        printf("RST 7\n");
         break;
     }
 
