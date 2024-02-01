@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.ejs": "html",
+        "8080-emulator.h": "c",
+        "cstddef": "c"
+    }
+}

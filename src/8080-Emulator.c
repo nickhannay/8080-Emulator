@@ -1,7 +1,11 @@
 #include "8080-Emulator.h"
 #include "operations.h"
-#include <stdint.h>
+#include "shared.h"
+#include "registers.h"
+
+
 #include <stdlib.h>
+
 
 
 int emulate8080(State8080* p_state){
