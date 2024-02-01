@@ -11,6 +11,8 @@ int main(int argc, char** argv){
         printf("Failed to load file into emulator\n");
     }
 
+
+    // memory dump
     for(int i = 0; i < 65536; i++){
         printf("cell num %d -- %02x\n", i, emu -> memory[i]);
     }

@@ -15,6 +15,7 @@
 State8080* emulator_Init(){
     State8080* emu = calloc(1, sizeof(State8080));
     emu -> memory = calloc(65536 , sizeof(byte));
+    emu -> sp = 0x7800;
 
     return emu;
 }
