@@ -49,7 +49,7 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RLC\n");
         break;
     case 0x08:
-        printf("%s\n", unsupported);
+        // unsupported
         break;
     case 0x09:
         op_DAD(p_state, opcode);

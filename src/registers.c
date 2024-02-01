@@ -14,6 +14,7 @@ void deleteRegPair(RegisterPair* rp){
 RegisterPair* extractRegPair(State8080* p_state, byte opcode){
     byte regCode = (opcode & 0x30) >> 4;
     RegisterPair* rp = createRegPair();
+    rp -> sp = NULL;
     switch(regCode){
         case 0b00:
             rp -> high = &p_state -> reg_b;
@@ -30,8 +31,7 @@ RegisterPair* extractRegPair(State8080* p_state, byte opcode){
             break;
 
         case 0b11:
-            rp -> high = &p_state -> reg_b;
-            rp -> low = &p_state -> reg_c;
+            rp -> sp = &p_state -> sp;
             break;
     }
 
@@ -67,7 +67,7 @@ byte* extractReg(State8080* p_state, byte opcode){
             break;
 
         case 0b110:
-            // setDCRFlags( &p_state->cc, &p_state->reg_m );
+            // setFlags( &p_state->cc, &p_state->reg_m );
             // TODO : Memory access
             break;
         case 0b111:

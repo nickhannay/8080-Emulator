@@ -6,7 +6,7 @@
 
 byte getParity(byte input);
 
-void setDCRFlags(struct ConditionCodes* cc,  byte* reg);
+void setFlags(struct ConditionCodes* cc,  byte* reg);
 
 int op_LXI(State8080* p_state, byte rp);
 
