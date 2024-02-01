@@ -153,7 +153,11 @@ int op_MOV(State8080* p_state, byte opcode){
 
 int op_ANA(State8080* p_state, byte opcode){
 
-    
+    byte* src_reg = extractReg(p_state, opcode << 3);
+    p_state -> reg_a &= *src_reg;
+    p_state -> cc.flag_ac = 0x00;
+
+    setFlags(&p_state ->cc, &p_state -> reg_a);
 
     return 0;
 }
