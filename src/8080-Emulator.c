@@ -106,7 +106,7 @@ int executeOp(State8080* p_state, byte opcode){
         op_DAD(p_state, opcode);
         break;
     case 0x1a:
-        printf("LDAX D\n");
+        op_LDAX(p_state, opcode);
         break;
     case 0x1b:
         printf("DCX D\n");
@@ -115,11 +115,11 @@ int executeOp(State8080* p_state, byte opcode){
         printf("INR E\n");
         break;
     case 0x1d:
-        printf("DCR E\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x1e:
-        printf("MVI E, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x1f:
         printf("RAR\n");
@@ -128,39 +128,39 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RIM\n");
         break;
     case 0x21:
-        printf("LXI H, %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        op_LXI(p_state, opcode);
+        dataSize = 2;
         break;
     case 0x22:
-        printf("SHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
+        //printf("SHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
         //printf("\n\ncpdes[index + 1] = %02x ---- codes[index+2] = %02x\n\n", codes[index + 1], codes[index + 2]);
-        dataSize = 3;
+        dataSize = 2;
         break;
     case 0x23:
-        printf("INX H\n");
+        op_INX(p_state, opcode);
         break;
     case 0x24:
         printf("INR H\n");
         break;
     case 0x25:
-        printf("DCR H\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x26:
-        printf("MVI H, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x27:
         printf("DAA\n");
         break;
     case 0x28:
-        printf("%s\n", unsupported);
+        // unsupported
         break;
     case 0x29:
-        printf("DAD H\n");
+        op_DAD(p_state, opcode);
         break;
     case 0x2a:
-        printf("LHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("LHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
+        dataSize = 2;
         break;
     case 0x2b:
         printf("DCX H\n");
@@ -169,11 +169,11 @@ int executeOp(State8080* p_state, byte opcode){
         printf("INR L\n");
         break;
     case 0x2d:
-        printf("DCR L\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x2e:
-        printf("MVI L, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x2f:
         printf("CMA");
@@ -182,38 +182,38 @@ int executeOp(State8080* p_state, byte opcode){
         printf("SIM");
         break;
     case 0x31:
-        printf("LXI SP, %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        op_LXI(p_state, opcode);
+        dataSize = 2;
         break;
     case 0x32:
-        printf("STA %02x%02x\n", codes[index + 2], codes[index +  1]);
-        dataSize = 3;
+        op_STA(p_state, opcode);
+        dataSize = 2;
         break;
     case 0x33:
-        printf("INX SP\n");
+        op_INX(p_state, opcode);
         break;
     case 0x34:
         printf("INR M\n");
         break;
     case 0x35:
-        printf("DCR M\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x36:
-        printf("MVI M, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x37:
         printf("STC\n");
         break;
     case 0x38:
-        printf("%s\n", unsupported);
+        // unsupported
         break;
     case 0x39:
-        printf("DAD SP\n");
+        op_DAD(p_state, opcode);
         break;
     case 0x3a:
-        printf("LDA %02x%02x\n", codes[index+2], codes[index + 1]);
-        dataSize = 3;
+        op_LDA(p_state, opcode);
+        dataSize = 2;
         break;
     case 0x3b:
         printf("DCX SP\n");
@@ -222,206 +222,84 @@ int executeOp(State8080* p_state, byte opcode){
         printf("INR A\n");
         break;
     case 0x3d:
-        printf("DCR A\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x3e:
-        printf("MVI A, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x3f:
         printf("CMC\n");
         break;
     case 0x40:
-        printf("MOV B, B\n");
-        break;
     case 0x41:
-        printf("MOV B, C\n");
-        break;
     case 0x42:
-        printf("MOV B, D\n");
-        break;
     case 0x43:
-        printf("MOV B, E\n");
-        break;
     case 0x44:
-        printf("MOV B, H\n");
-        break;
     case 0x45:
-        printf("MOV B, L\n");
-        break;
     case 0x46:
-        printf("MOV B, M\n");
-        break;
     case 0x47:
-        printf("MOV B, A\n");
-        break;
     case 0x48:
-        printf("MOV C, B\n");
-        break;
     case 0x49:
-        printf("MOV C, C\n");
-        break;
     case 0x4a:
-        printf("MOV C, D\n");
-        break;
     case 0x4b:
-        printf("MOV C, E\n");
-        break;
     case 0x4c:
-        printf("MOV C, H\n");
-        break;
     case 0x4d:
-        printf("MOV C, L\n");
-        break;
     case 0x4e:
-        printf("MOV C, M\n");
-        break;
     case 0x4f:
-        printf("MOV C, A\n");
-        break;
     case 0x50:
-        printf("MOV D, B\n");
-        break;
     case 0x51:
-        printf("MOV D, C\n");
-        break;
     case 0x52:
-        printf("MOV D, D\n");
-        break;
     case 0x53:
-        printf("MOV D, E\n");
-        break;
     case 0x54:
-        printf("MOV D, H\n");
-        break;
     case 0x55:
-        printf("MOV D, L\n");
-        break;
     case 0x56:
-        printf("MOV D, M\n");
-        break;
     case 0x57:
-        printf("MOV D, A\n");
-        break;
     case 0x58:
-        printf("MOV E, B\n");
-        break;
     case 0x59:
-        printf("MOV E, C\n");
-        break;
     case 0x5a:
-        printf("MOV E, D\n");
-        break;
     case 0x5b:
-        printf("MOV E, E\n");
-        break;
     case 0x5c:
-        printf("MOV E, H\n");
-        break;
     case 0x5d:
-        printf("MOV E, L\n");
-        break;
     case 0x5e:
-        printf("MOV E, M\n");
-        break;
     case 0x5f:
-        printf("MOV E, A\n");
-        break;
     case 0x60:
-        printf("MOV H, B\n");
-        break;
     case 0x61:
-        printf("MOV H, C\n");
-        break;
     case 0x62:
-        printf("MOV H, D\n");
-        break;
     case 0x63:
-        printf("MOV H, E\n");
-        break;
     case 0x64:
-        printf("MOV H, H\n");
-        break;
     case 0x65:
-        printf("MOV H, L\n");
-        break;
     case 0x66:
-        printf("MOV H, M\n");
-        break;
     case 0x67:
-        printf("MOV H, A\n");
-        break;
     case 0x68:
-        printf("MOV L, B\n");
-        break;
     case 0x69:
-        printf("MOV L, C\n");
-        break;
     case 0x6a:
-        printf("MOV L, D\n");
-        break;
     case 0x6b:
-        printf("MOV L, E\n");
-        break;
     case 0x6c:
-        printf("MOV L, H\n");
-        break;
     case 0x6d:
-        printf("MOV L, L\n");
-        break;
     case 0x6e:
-        printf("MOV L, M\n");
-        break;
     case 0x6f:
-        printf("MOV L, A\n");
-        break;
     case 0x70:
-        printf("MOV M, B\n");
-        break;
     case 0x71:
-        printf("MOV M, C\n");
-        break;
     case 0x72:
-        printf("MOV M, D\n");
-        break;
     case 0x73:
-        printf("MOV M, E\n");
-        break;
     case 0x74:
-        printf("MOV M, H\n");
-        break;
     case 0x75:
-        printf("MOV M, L\n");
+        op_MOV(p_state, opcode);
         break;
     case 0x76:
         printf("HLT\n");
         break;
     case 0x77:
-        printf("MOV M, A\n");
-        break;
     case 0x78:
-        printf("MOV A, B\n");
-        break;
     case 0x79:
-        printf("MOV A, C\n");
-        break;
     case 0x7a:
-        printf("MOV A, D\n");
-        break;
     case 0x7b:
-        printf("MOV A, E\n");
-        break;
     case 0x7c:
-        printf("MOV A, H\n");
-        break;
     case 0x7d:
-        printf("MOV A, L\n");
-        break;
     case 0x7e:
-        printf("MOV A, M\n");
-        break;
     case 0x7f:
-        printf("MOV , A\n");
+        op_MOV(p_state, opcode);
         break;
     case 0x80:
         printf("ADD B\n");
@@ -541,7 +419,7 @@ int executeOp(State8080* p_state, byte opcode){
         printf("ANA M\n");
         break;
     case 0xa7:
-        printf("ANA A\n");
+        op_ANA(p_state, opcode);
         break;
     case 0xa8:
         printf("XRA B\n");

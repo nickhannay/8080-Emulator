@@ -23,7 +23,11 @@ int op_LXI(State8080* p_state, byte opcode){
 
 
 int op_LDAX(State8080* p_state, byte opcode){
-    
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+
+    p_state -> reg_a = p_state -> memory[u8_to_u16(*rp->high, *rp -> low)];
+
+    deleteRegPair(rp);
     return 0;
 }
 
@@ -116,6 +120,41 @@ int op_INX(State8080* p_state, byte opcode){
 
 
     deleteRegPair(rp);
+    return 0;
+}
+
+int op_STA(State8080* p_state, byte opcode){
+    byte low = p_state -> memory[p_state ->  pc];
+    byte high = p_state -> memory[p_state -> pc + 1];
+
+    uint16_t addr = u8_to_u16(high, low);
+    p_state -> memory[addr] = p_state -> reg_a;
+    return 0;
+}
+
+
+int op_LDA(State8080* p_state, byte opcode){
+    byte low = p_state -> memory[p_state ->  pc];
+    byte high = p_state -> memory[p_state -> pc + 1];
+
+    uint16_t addr = u8_to_u16(high, low);
+    p_state -> reg_a = p_state -> memory[addr];
+    return 0;
+}
+
+int op_MOV(State8080* p_state, byte opcode){
+    byte* reg_dst  = extractReg(p_state, opcode);
+    byte* reg_src = extractReg(p_state, opcode << 3);
+
+    *reg_dst = *reg_src;
+    return 0;
+}
+
+
+int op_ANA(State8080* p_state, byte opcode){
+
+    
+
     return 0;
 }
 
