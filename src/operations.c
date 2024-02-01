@@ -57,6 +57,26 @@ int op_MVI(State8080* p_state, byte opcode){
 }
 
 
+int op_ADI(State8080* p_state, byte opcode){
+    uint16_t immediate = p_state -> memory[p_state -> pc];
+    uint16_t acc = p_state -> reg_a;
+
+    uint16_t res = acc + immediate;
+    p_state -> reg_a = (byte) res;
+
+    if(res >> 8 == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+
+    setFlags(&p_state->cc, &p_state -> reg_a);
+
+
+    return 0;
+}
+
+
+
+
 int op_DAD(State8080* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
 
@@ -72,7 +92,7 @@ int op_DAD(State8080* p_state, byte opcode){
     
 
     // check overflow
-    p_state -> cc.flag_cy |= (result & 0x10000) == 0x10000;
+    p_state -> cc.flag_cy |= ((result & 0x10000) == 0x10000);
 
 
     p_state -> reg_h = (result & 0xff00 ) >> 8;
@@ -174,13 +194,115 @@ int op_XRA(State8080* p_state, byte opcode){
 }
 
 
+int op_PUSH(State8080* p_state, byte opcode){
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+
+    p_state -> memory[p_state -> sp - 2] = *rp->low;
+    p_state -> memory[p_state -> sp - 1] = *rp -> high;
+
+    p_state -> sp -= 2;
+
+    deleteRegPair(rp);
+
+    return 0;
+}
+
+
+int op_POP(State8080* p_state, byte opcode){
+
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+    *rp -> low = p_state -> memory[p_state -> sp];
+    *rp -> high = p_state -> memory[p_state -> sp + 1];
+    p_state -> sp += 2;
+
+    deleteRegPair(rp);
+    return 0;
+}
+
+
+int op_JNZ(State8080* p_state, byte opcode){
+    if(p_state -> cc.flag_z == 0){
+        // jump
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        // update pc
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return 0;
+}
+
+
+int op_JMP(State8080* p_state, byte opcode){
+    uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        // update pc
+    p_state -> pc = addr;
+
+    return 0;
+}
+
+
+
+int op_RET(State8080* p_state, byte opcode){
+    uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
+    p_state -> sp += 2;
+
+    p_state -> pc = addr;
+
+
+    return 0;
+}
+
+
+
+
+int op_CALL(State8080* p_state, byte opcode){
+    // CALL addr
+    uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
+    p_state -> pc += 2;
+
+    byte low = p_state -> pc & 0x00ff;
+    byte high = (p_state -> pc & 0xff00) >> 8;
+
+    // push pc onto stack
+    p_state -> memory[p_state -> sp - 1] = high;
+    p_state -> memory[p_state -> sp - 2] = low;
+    p_state -> sp -= 2;
+
+    
+    p_state -> pc = addr;
+
+    return 0;
+}
+
+
+
+int op_OUT(State8080* p_state, byte opcode){
+
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 void setFlags(struct ConditionCodes* cc,  byte* reg){
     cc -> flag_z = *reg == 0;
     cc -> flag_p = getParity(*reg) == 0;
-    cc -> flag_s = *reg & 0x80;
+    cc -> flag_s = (*reg >> 7) & 1;
 }
 
 

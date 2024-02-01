@@ -5,16 +5,18 @@
 
 
 #include <stdlib.h>
-
+#include <stdio.h>
+#include <stdbool.h>
 
 
 int emulate8080(State8080* p_state){
-    byte opcode = p_state->memory[p_state->pc];
-    p_state -> pc += 1;
-    int dataSize = executeOp(&p_state, opcode);
-
-
-    p_state -> pc += dataSize;
+    while(true){
+        byte opcode = p_state->memory[p_state->pc];
+        
+        executeOp(p_state, opcode);
+    }
+    
+    return 0;
 }
 
 
@@ -22,13 +24,14 @@ int emulate8080(State8080* p_state){
 
 
 int executeOp(State8080* p_state, byte opcode){
-    int dataSize = 0;
+    p_state -> pc += 1;
+    
     switch(opcode){
         case 0x00:
         break;
     case 0x01:
         op_LXI(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x02:
         op_STAX(p_state, opcode);
@@ -43,7 +46,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x06:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x07:
         printf("RLC\n");
@@ -68,7 +71,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x0e:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x0f:
         op_RAC(p_state, opcode);
@@ -78,7 +81,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x11:
         op_LXI(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x12:
         op_STAX(p_state, opcode);
@@ -94,7 +97,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x16:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x17:
         printf("RAL");
@@ -119,7 +122,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x1e:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x1f:
         printf("RAR\n");
@@ -129,12 +132,12 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x21:
         op_LXI(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x22:
         //printf("SHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
         //printf("\n\ncpdes[index + 1] = %02x ---- codes[index+2] = %02x\n\n", codes[index + 1], codes[index + 2]);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x23:
         op_INX(p_state, opcode);
@@ -147,7 +150,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x26:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x27:
         printf("DAA\n");
@@ -160,7 +163,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x2a:
         //printf("LHLD %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x2b:
         printf("DCX H\n");
@@ -173,7 +176,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x2e:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x2f:
         printf("CMA");
@@ -183,11 +186,11 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x31:
         op_LXI(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x32:
         op_STA(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x33:
         op_INX(p_state, opcode);
@@ -200,7 +203,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x36:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x37:
         printf("STC\n");
@@ -213,7 +216,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x3a:
         op_LDA(p_state, opcode);
-        dataSize = 2;
+        p_state -> pc += 2;
         break;
     case 0x3b:
         printf("DCX SP\n");
@@ -226,7 +229,7 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0x3e:
         op_MVI(p_state, opcode);
-        dataSize = 1;
+        p_state -> pc += 1;
         break;
     case 0x3f:
         printf("CMC\n");
@@ -469,26 +472,24 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RNZ\n");
         break;
     case 0xc1:
-        printf("POP B\n");
+        op_POP(p_state, opcode);
         break;
     case 0xc2:
-        printf("JNZ %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        op_JNZ(p_state, opcode);
         break;
     case 0xc3:
-        printf("JMP %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        op_JMP(p_state, opcode);
         break;
     case 0xc4:
-        printf("CNZ %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CNZ %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xc5:
-        printf("PUSH B\n");
+        op_PUSH(p_state, opcode);
         break;
     case 0xc6:
-        printf("ADI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_ADI(p_state, opcode);
+        p_state -> pc += 1;
         break;
     case 0xc7:
         printf("RST 0\n");
@@ -497,26 +498,25 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RZ\n");
         break;
     case 0xc9:
-        printf("RET\n");
+        op_RET(p_state, opcode);
         break;
     case 0xca:
-        printf("JZ %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JZ %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xcb:
-        printf("%s/n", unsupported);
+        // not supported
         break;
     case 0xcc:
-        printf("CZ %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CZ %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xcd:
-        printf("CALL %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        op_CALL(p_state, opcode);
         break;
     case 0xce:
-        printf("ACI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("ACI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xcf:
         printf("RST 1\n");
@@ -525,26 +525,26 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RNC\n");
         break;
     case 0xd1:
-        printf("POP D\n");
+        op_POP(p_state, opcode);
         break;
     case 0xd2:
-        printf("JNC %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JNC %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xd3:
-        printf("OUT %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("OUT %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xd4:
-        printf("CNC %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CNC %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xd5:
-        printf("PUSH D\n");
+        op_PUSH(p_state, opcode);
         break;
     case 0xd6:
-        printf("SUI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("SUI %02x\n", codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xd7:
         printf("RST 2\n");
@@ -553,26 +553,26 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RC\n");
         break;
     case 0xd9:
-        printf("%s/n", unsupported);
+        // not supported
         break;
     case 0xda:
-        printf("JC %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JC %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xdb:
-        printf("IN %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("IN %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xdc:
-        printf("CC %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CC %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xdd:
-        printf("%s/n", unsupported);
+        // not supported
         break;
     case 0xde:
-        printf("SBI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("SBI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xdf:
         printf("RST 3\n");
@@ -581,25 +581,25 @@ int executeOp(State8080* p_state, byte opcode){
         printf("RPO\n");
         break;
     case 0xe1:
-        printf("POP H\n");
+        op_POP(p_state, opcode);
         break;
     case 0xe2:
-        printf("JPO %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JPO %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xe3:
         printf("XTHL\n");
         break;
     case 0xe4:
-        printf("CPO %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CPO %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xe5:
-        printf("PUSH H\n");
+        op_PUSH(p_state, opcode);
         break;
     case 0xe6:
-        printf("ANI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("ANI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xe7:
         printf("RST 4\n");
@@ -611,22 +611,22 @@ int executeOp(State8080* p_state, byte opcode){
         printf("PCHL\n");
         break;
     case 0xea:
-        printf("JPE %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JPE %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xeb:
         printf("XCHG\n");
         break;
     case 0xec:
-        printf("CPE %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CPE %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xed:
-        printf("%s/n", unsupported);
+        // not supported
         break;
     case 0xee:
-        printf("XRI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("XRI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xef:
         printf("RST 5\n");
@@ -636,24 +636,25 @@ int executeOp(State8080* p_state, byte opcode){
         break;
     case 0xf1:
         printf("POP PSW\n");
+        // need to handle flags for special case 
         break;
     case 0xf2:
-        printf("JP %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JP %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xf3:
         printf("DI\n");
         break;
     case 0xf4:
-        printf("CP %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CP %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xf5:
         printf("PUSH PSW\n");
         break;
     case 0xf6:
-        printf("ORI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("ORI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xf7:
         printf("RST 6\n");
@@ -665,29 +666,29 @@ int executeOp(State8080* p_state, byte opcode){
         printf("SPHL\n");
         break;
     case 0xfa:
-        printf("JM %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("JM %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xfb:
         printf("EI\n");
         break;
     case 0xfc:
-        printf("CM %02x%02x\n", codes[index + 2], codes[index + 1]);
-        dataSize = 3;
+        //printf("CM %02x%02x\n", codes[index + 2], codes[index + 1]);
+        p_state -> pc += 2;
         break;
     case 0xfd:
-        printf("%s/n", unsupported);
+        // not supported
         break;
     case 0xfe:
-        printf("CPI %02x\n", codes[index + 1]);
-        dataSize = 2;
+        //printf("CPI %02x\n", codes[index + 1]);
+        p_state -> pc += 1;
         break;
     case 0xff:
         printf("RST 7\n");
         break;
     }
 
-    return dataSize;
+    return 0;
 
 }
 

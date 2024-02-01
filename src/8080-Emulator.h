@@ -1,6 +1,8 @@
 #ifndef _8080_EMULATOR_H
 #define _8080_EMULATOR_H
 
+#include "shared.h"
+
 
 struct ConditionCodes{
     byte    flag_z:1;

@@ -9,6 +9,12 @@ byte getParity(byte input);
 void setFlags(struct ConditionCodes* cc,  byte* reg);
 
 
+/* ****************************  JUMP INSTRUCTIONS ******************************* */
+int op_JNZ(State8080* p_state, byte opcode);
+
+int op_JMP(State8080* p_state, byte opcode);
+
+
 
 
 /* ****************************  DIRECT ADDRESSING INSTRUCTIONS ******************************* */
@@ -26,6 +32,8 @@ int op_MVI(State8080* p_state, byte opcode);
 
 int op_LXI(State8080* p_state, byte opcode);
 
+int op_ADI(State8080* p_state, byte opcode);
+
 
 
 
@@ -33,6 +41,10 @@ int op_LXI(State8080* p_state, byte opcode);
 int op_INX(State8080* p_state, byte opcode);
 
 int op_DAD(State8080* p_state, byte opcode);
+
+int op_PUSH(State8080* p_state, byte opcode);
+
+int op_POP(State8080* p_state, byte opcode);
 
 
 
@@ -63,6 +75,29 @@ int op_LDAX(State8080* p_state, byte opcode);
 
 /* ****************************  SINGLE REGISTER INSTRUCTIONS *************************** */
 int op_DCR(State8080* p_state, byte opcode);
+
+
+
+
+
+/* ****************************  RETURN FROM SUBROUTINE INSTRUCTIONS *************************** */
+int op_RET(State8080* p_state, byte opcode);
+
+
+
+
+
+
+/* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */
+int op_CALL(State8080* p_state, byte opcode);
+
+
+
+
+
+/* ****************************  IO INSTRUCTIONS *************************** */
+int op_OUT(State8080* p_state, byte opcode);
+
 
 
 
