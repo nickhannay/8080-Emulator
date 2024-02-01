@@ -6,32 +6,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-const int BUF_SIZE = 10000;
-
-typedef uint8_t byte;
-
-int printOpCode(byte codes[], int index);
-int processBuffer(byte codes[], int buffer_size);
-
-
-
-int main(char** argv, int argc){
-	int fd = open(argv[1], O_RDONLY);
-
-	byte buffer[BUF_SIZE];
-	int bytes_read = read(fd, &buffer, BUF_SIZE);
-    processBuffer(buffer, bytes_read);
-    
-
-    printf("Bytes read: %d\n", bytes_read);
-	close(fd);
-	
-
-	return 0;
-
-}
-
-
+#include "emulator_disassembler.h"
 
 
 int processBuffer(byte codes[], int buffer_size){
@@ -41,10 +16,6 @@ int processBuffer(byte codes[], int buffer_size){
     }
     return index;
 }
-
-
-
-
 
 
 

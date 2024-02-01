@@ -107,7 +107,6 @@ int op_OUT(State8080* p_state, byte opcode);
 
 
 
-
 //
 int op_setI(State8080* p_state, byte toggle);
 

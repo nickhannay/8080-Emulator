@@ -2,6 +2,7 @@
 #include "operations.h"
 #include "shared.h"
 #include "registers.h"
+#include "emulator_disassembler.h"
 
 
 #include <stdlib.h>
@@ -40,10 +41,9 @@ void emulator_Terminate(State8080* emu){
 
 
 int emulator_Start(State8080* p_state){
-    while(true){
+    for(int i = 0; i < 25600; i++) {
         byte opcode = p_state->memory[p_state->pc];
 
-        
         emulator_executeOp(p_state, opcode);
     }
     
@@ -55,6 +55,8 @@ int emulator_Start(State8080* p_state){
 
 
 int emulator_executeOp(State8080* p_state, byte opcode){
+    printOpCode(p_state -> memory, p_state -> pc);
+
     p_state -> pc += 1;
     
     switch(opcode){

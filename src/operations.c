@@ -64,7 +64,7 @@ int op_ADI(State8080* p_state, byte opcode){
     uint16_t res = acc + immediate;
     p_state -> reg_a = (byte) res;
 
-    if(res >> 8 == 1){
+    if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
 
@@ -82,7 +82,7 @@ int op_CPI(State8080* p_state, byte opcode){
 
     uint16_t cmp = p_state -> reg_a + twos_comp;
 
-    p_state -> cc.flag_cy = cmp & 0xf0 == 0xf0;
+    p_state -> cc.flag_cy = (cmp & 0xf0) == 0xf0;
 
     byte res = (byte) cmp;
     setFlags(&p_state -> cc, &res);
@@ -151,7 +151,7 @@ int op_XCHG(State8080* p_state, byte opcode){
 
 
 int op_RAC(State8080* p_state, byte opcode){
-    byte op = opcode & 0x18;
+    byte op = opcode >> 3 & 0x03;
     switch(op){
         case 0x00:
             // RLC
@@ -239,7 +239,7 @@ int op_XRA(State8080* p_state, byte opcode){
 
 
 int op_PUSH(State8080* p_state, byte opcode){
-    if((opcode & 0x30) >> 4 == 0x11){
+    if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
         p_state -> memory[p_state -> sp - 1]  = p_state -> reg_a;
 
@@ -270,7 +270,7 @@ int op_PUSH(State8080* p_state, byte opcode){
 
 
 int op_POP(State8080* p_state, byte opcode){
-    if((opcode & 0x30) >> 4 == 0x11){
+    if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
         byte flags = p_state -> memory[p_state -> sp];
         p_state -> reg_a = p_state -> memory[p_state -> sp + 1];
