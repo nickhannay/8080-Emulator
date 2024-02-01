@@ -58,7 +58,7 @@ int executeOp(State8080* p_state, byte opcode){
         op_DAD(p_state, opcode);
         break;
     case 0x0a:
-        printf("LDAX B\n");
+        op_LDAX(p_state, opcode);
         break;
     case 0x0b:
         printf("DCX B\n");
@@ -532,7 +532,7 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xd3:
-        //printf("OUT %02x\n", codes[index + 1]);
+        op_OUT(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0xd4:
@@ -598,7 +598,7 @@ int executeOp(State8080* p_state, byte opcode){
         op_PUSH(p_state, opcode);
         break;
     case 0xe6:
-        //printf("ANI %02x\n", codes[index + 1]);
+        op_ANI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0xe7:
@@ -615,7 +615,7 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xeb:
-        printf("XCHG\n");
+        op_XCHG(p_state, opcode);
         break;
     case 0xec:
         //printf("CPE %02x%02x\n", codes[index + 2], codes[index + 1]);
@@ -643,7 +643,8 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xf3:
-        printf("DI\n");
+        // disable interrupts
+        op_setI(p_state, 0);
         break;
     case 0xf4:
         //printf("CP %02x%02x\n", codes[index + 2], codes[index + 1]);
@@ -670,7 +671,8 @@ int executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xfb:
-        printf("EI\n");
+        // enable interrupts
+        op_setI(p_state, 1);
         break;
     case 0xfc:
         //printf("CM %02x%02x\n", codes[index + 2], codes[index + 1]);

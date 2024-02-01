@@ -34,6 +34,9 @@ int op_LXI(State8080* p_state, byte opcode);
 
 int op_ADI(State8080* p_state, byte opcode);
 
+int op_ANI(State8080* p_state, byte opcode);
+
+int op_CPI(State8080* p_state, byte opcode);
 
 
 
@@ -45,6 +48,8 @@ int op_DAD(State8080* p_state, byte opcode);
 int op_PUSH(State8080* p_state, byte opcode);
 
 int op_POP(State8080* p_state, byte opcode);
+
+int op_XCHG(State8080* p_state, byte opcode);
 
 
 
@@ -103,6 +108,8 @@ int op_OUT(State8080* p_state, byte opcode);
 
 
 
+//
+int op_setI(State8080* p_state, byte toggle);
 
 
 #endif

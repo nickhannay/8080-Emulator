@@ -75,6 +75,35 @@ int op_ADI(State8080* p_state, byte opcode){
 }
 
 
+int op_CPI(State8080* p_state, byte opcode){
+    uint16_t immediate = p_state -> memory[p_state -> pc];
+
+    uint16_t twos_comp  = ~immediate + 1;
+
+    uint16_t cmp = p_state -> reg_a + twos_comp;
+
+    p_state -> cc.flag_cy = cmp & 0xf0 == 0xf0;
+
+    byte res = (byte) cmp;
+    setFlags(&p_state -> cc, &res);
+
+
+    return 0;
+}
+
+
+
+int op_ANI(State8080* p_state, byte opcode){
+
+    p_state -> reg_a &= p_state -> memory[p_state -> pc];
+
+    p_state -> cc.flag_cy = 0;
+
+    setFlags(&p_state->cc, &p_state->reg_a);
+
+    return 0;
+}
+
 
 
 int op_DAD(State8080* p_state, byte opcode){
@@ -102,6 +131,21 @@ int op_DAD(State8080* p_state, byte opcode){
     deleteRegPair(rp);
     return 0;
 
+}
+
+
+int op_XCHG(State8080* p_state, byte opcode){
+    // exchange high order byte
+    byte tmp = p_state -> reg_d;
+    p_state -> reg_d = p_state -> reg_h;
+    p_state -> reg_h = tmp;
+
+    // exchange low order byte
+    tmp = p_state -> reg_e;
+    p_state -> reg_e = p_state -> reg_l;
+    p_state -> reg_l = tmp; 
+
+    return 0;
 }
 
 
@@ -195,27 +239,56 @@ int op_XRA(State8080* p_state, byte opcode){
 
 
 int op_PUSH(State8080* p_state, byte opcode){
-    RegisterPair* rp = extractRegPair(p_state, opcode);
+    if((opcode & 0x30) >> 4 == 0x11){
+        // handle PSW 
+        p_state -> memory[p_state -> sp - 1]  = p_state -> reg_a;
 
-    p_state -> memory[p_state -> sp - 2] = *rp->low;
-    p_state -> memory[p_state -> sp - 1] = *rp -> high;
+        // FLAGs
+        byte flags = p_state -> cc.flag_cy | 
+                     0x02 |
+                     p_state -> cc.flag_p << 2 |
+                     0x00 |
+                     p_state -> cc.flag_ac << 4 |
+                     0x00 |
+                     p_state -> cc.flag_z << 6 | 
+                     p_state -> cc.flag_s << 7;
+
+        p_state -> memory[p_state -> sp - 2] = flags;
+
+    }
+    else {
+        RegisterPair* rp = extractRegPair(p_state, opcode);
+        p_state -> memory[p_state -> sp - 2] = *rp->low;
+        p_state -> memory[p_state -> sp - 1] = *rp -> high;
+        deleteRegPair(rp);
+    }
 
     p_state -> sp -= 2;
-
-    deleteRegPair(rp);
 
     return 0;
 }
 
 
 int op_POP(State8080* p_state, byte opcode){
+    if((opcode & 0x30) >> 4 == 0x11){
+        // handle PSW 
+        byte flags = p_state -> memory[p_state -> sp];
+        p_state -> reg_a = p_state -> memory[p_state -> sp + 1];
 
-    RegisterPair* rp = extractRegPair(p_state, opcode);
-    *rp -> low = p_state -> memory[p_state -> sp];
-    *rp -> high = p_state -> memory[p_state -> sp + 1];
+        p_state -> cc.flag_ac = flags >> 4 & 1;
+        p_state -> cc.flag_cy = flags & 1;
+        p_state -> cc.flag_z = flags >> 6 & 1;
+        p_state -> cc.flag_s = flags >> 7 & 1;
+        p_state -> cc.flag_p = flags >> 2 & 1;
+    }
+    else{
+        RegisterPair* rp = extractRegPair(p_state, opcode);
+        *rp -> low = p_state -> memory[p_state -> sp];
+        *rp -> high = p_state -> memory[p_state -> sp + 1];
+        deleteRegPair(rp);
+    }
+
     p_state -> sp += 2;
-
-    deleteRegPair(rp);
     return 0;
 }
 
@@ -280,13 +353,18 @@ int op_CALL(State8080* p_state, byte opcode){
 
 
 int op_OUT(State8080* p_state, byte opcode){
-
+    // TODO : IMPLEMENT
 
     return 0;
 }
 
 
 
+int op_setI(State8080* p_state, byte toggle){
+    p_state -> int_enable = toggle;
+
+    return 0;
+}
 
 
 

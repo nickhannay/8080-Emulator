@@ -67,8 +67,7 @@ byte* extractReg(State8080* p_state, byte opcode){
             break;
 
         case 0b110:
-            // setFlags( &p_state->cc, &p_state->reg_m );
-            // TODO : Memory access
+            reg = &p_state -> memory[u8_to_u16(p_state -> reg_h, p_state -> reg_l)];
             break;
         case 0b111:
             reg = &p_state -> reg_a;
