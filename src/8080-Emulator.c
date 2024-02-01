@@ -84,26 +84,26 @@ int executeOp(State8080* p_state, byte opcode){
         op_STAX(p_state, opcode);
         break;
     case 0x13:
-        printf("INX D\n");
+        op_INX(p_state, opcode);
         break;
     case 0x14:
         printf("INR D\n");
         break;
     case 0x15:
-        printf("DCR D\n");
+        op_DCR(p_state, opcode);
         break;
     case 0x16:
-        printf("MVI D, %02x\n", codes[index + 1]);
-        dataSize = 2;
+        op_MVI(p_state, opcode);
+        dataSize = 1;
         break;
     case 0x17:
         printf("RAL");
         break;
     case 0x18:
-        printf("%s\n", unsupported);
+        // unsupported 
         break;
     case 0x19:
-        printf("DAD D\n");
+        op_DAD(p_state, opcode);
         break;
     case 0x1a:
         printf("LDAX D\n");

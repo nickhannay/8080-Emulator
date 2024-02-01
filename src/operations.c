@@ -22,6 +22,12 @@ int op_LXI(State8080* p_state, byte opcode){
 }
 
 
+int op_LDAX(State8080* p_state, byte opcode){
+    
+    return 0;
+}
+
+
 int op_STAX(State8080* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     
@@ -102,9 +108,14 @@ int op_RAC(State8080* p_state, byte opcode){
 
 
 int op_INX(State8080* p_state, byte opcode){
-    
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+    uint16_t combined = u8_to_u16(*rp -> high, *rp -> low);
+    combined += 1;
+    *rp -> high = (combined & 0xff00 ) >> 8;
+    *rp -> low = combined & 0x00ff;
 
-    
+
+    deleteRegPair(rp);
     return 0;
 }
 
