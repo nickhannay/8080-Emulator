@@ -46,6 +46,8 @@ int op_RAC(State8080* p_state, byte opcode);
 /* *******************  REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS ****************** */
 int op_ANA(State8080* p_state, byte opcode);
 
+int op_XRA(State8080* p_state, byte opcode);
+
 
 
 

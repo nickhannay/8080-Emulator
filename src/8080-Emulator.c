@@ -398,52 +398,24 @@ int executeOp(State8080* p_state, byte opcode){
         printf("SBB A\n");
         break;
     case 0xa0:
-        printf("ANA B\n");
-        break;
     case 0xa1:
-        printf("ANA C\n");
-        break;
     case 0xa2:
-        printf("ANA D\n");
-        break;
     case 0xa3:
-        printf("ANA E\n");
-        break;
     case 0xa4:
-        printf("ANA H\n");
-        break;
     case 0xa5:
-        printf("ANA L\n");
-        break;
     case 0xa6:
-        printf("ANA M\n");
-        break;
     case 0xa7:
         op_ANA(p_state, opcode);
         break;
     case 0xa8:
-        printf("XRA B\n");
-        break;
     case 0xa9:
-        printf("XRA C\n");
-        break;
     case 0xaa:
-        printf("XRA D\n");
-        break;
     case 0xab:
-        printf("XRA E\n");
-        break;
     case 0xac:
-        printf("XRA H\n");
-        break;
     case 0xad:
-        printf("XRA L\n");
-        break;
     case 0xae:
-        printf("XRA M\n");
-        break;
     case 0xaf:
-        printf("XRA A\n");
+        op_XRA(p_state, opcode);
         break;
     case 0xb0:
         printf("ORA B\n");
