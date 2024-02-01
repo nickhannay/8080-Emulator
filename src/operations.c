@@ -76,6 +76,42 @@ int op_DAD(State8080* p_state, byte opcode){
 
 
 
+int op_RAC(State8080* p_state, byte opcode){
+    byte op = opcode & 0x18;
+    switch(op){
+        case 0x00:
+            // RLC
+            break;
+        case 0x01:
+            // RRC
+            byte LSB = p_state -> reg_a & 0x01;
+            p_state -> reg_a >>= 1;
+            p_state -> reg_a |= (LSB << 7);
+            p_state -> cc.flag_cy &= LSB;
+            break;
+        case 0x10:
+            // RAL
+            break;
+        case 0x11:
+            // RAR
+            break;
+    }
+
+    return 0;
+}
+
+
+int op_INX(State8080* p_state, byte opcode){
+    
+
+    
+    return 0;
+}
+
+
+
+
+
 void setFlags(struct ConditionCodes* cc,  byte* reg){
     cc -> flag_z = *reg == 0;
     cc -> flag_p = getParity(*reg) == 0;

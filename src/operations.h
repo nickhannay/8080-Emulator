@@ -18,7 +18,9 @@ int op_DAD(State8080* p_state, byte opcode);
 
 int op_MVI(State8080* p_state, byte opcode);
 
-int op_DAD(State8080* p_state, byte opcode);
+int op_RAC(State8080* p_state, byte opcode);
+
+int op_INX(State8080* p_state, byte opcode);
 
 
 #endif

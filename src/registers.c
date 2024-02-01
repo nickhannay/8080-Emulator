@@ -44,26 +44,26 @@ byte* extractReg(State8080* p_state, byte opcode){
     byte *reg = NULL;
     switch(regCode){
         case 0b000:
-            reg = p_state -> reg_b;
+            reg = &p_state -> reg_b;
             break;
         case 0b001: 
-            reg = p_state -> reg_c;
+            reg = &p_state -> reg_c;
             break;
 
         case 0b010:
-            reg = p_state -> reg_d;
+            reg = &p_state -> reg_d;
             break;
 
         case 0b011:
-            reg = p_state -> reg_e;
+            reg = &p_state -> reg_e;
             break;
 
         case 0b100:
-            reg = p_state -> reg_h;
+            reg = &p_state -> reg_h;
             break;
 
         case 0b101:
-            reg = p_state -> reg_l;
+            reg = &p_state -> reg_l;
             break;
 
         case 0b110:
@@ -71,7 +71,7 @@ byte* extractReg(State8080* p_state, byte opcode){
             // TODO : Memory access
             break;
         case 0b111:
-            reg = p_state -> reg_a;
+            reg = &p_state -> reg_a;
             break;
     }
 
