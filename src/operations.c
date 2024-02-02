@@ -3,6 +3,7 @@
 #include "registers.h"
 #include "shared.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 
 /* ********************************************* OPERATIONS ***************************************************** */
@@ -43,7 +44,9 @@ int op_STAX(State8080* p_state, byte opcode){
 
 int op_DCR(State8080* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode);
+    byte tmp = *r;
     *r -= 1;
+    printf("Before: %02x --- After: %02x\n",tmp, *r );
     setFlags(&p_state->cc, r );
 
     return 0;
@@ -254,6 +257,7 @@ int op_PUSH(State8080* p_state, byte opcode){
                      p_state -> cc.flag_s << 7;
 
         p_state -> memory[p_state -> sp - 2] = flags;
+        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
 
     }
     else {
@@ -261,6 +265,7 @@ int op_PUSH(State8080* p_state, byte opcode){
         p_state -> memory[p_state -> sp - 2] = *rp->low;
         p_state -> memory[p_state -> sp - 1] = *rp -> high;
         deleteRegPair(rp);
+        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
     }
 
     p_state -> sp -= 2;
@@ -274,6 +279,7 @@ int op_POP(State8080* p_state, byte opcode){
         // handle PSW 
         byte flags = p_state -> memory[p_state -> sp];
         p_state -> reg_a = p_state -> memory[p_state -> sp + 1];
+        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
 
         p_state -> cc.flag_ac = flags >> 4 & 1;
         p_state -> cc.flag_cy = flags & 1;
@@ -285,6 +291,8 @@ int op_POP(State8080* p_state, byte opcode){
         RegisterPair* rp = extractRegPair(p_state, opcode);
         *rp -> low = p_state -> memory[p_state -> sp];
         *rp -> high = p_state -> memory[p_state -> sp + 1];
+
+        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
         deleteRegPair(rp);
     }
 
@@ -320,10 +328,11 @@ int op_JMP(State8080* p_state, byte opcode){
 
 int op_RET(State8080* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
+
+    printf("Returning to %04x\n", addr);
     p_state -> sp += 2;
 
     p_state -> pc = addr;
-
 
     return 0;
 }
@@ -335,9 +344,13 @@ int op_CALL(State8080* p_state, byte opcode){
     // CALL addr
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
     p_state -> pc += 2;
+    
+    
 
     byte low = p_state -> pc & 0x00ff;
     byte high = (p_state -> pc & 0xff00) >> 8;
+
+    printf("calling %04x\n", u8_to_u16(high, low));
 
     // push pc onto stack
     p_state -> memory[p_state -> sp - 1] = high;

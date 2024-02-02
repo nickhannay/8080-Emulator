@@ -41,7 +41,7 @@ void emulator_Terminate(State8080* emu){
 
 
 int emulator_Start(State8080* p_state){
-    for(int i = 0; i < 25600; i++) {
+    for(;;) {
         byte opcode = p_state->memory[p_state->pc];
 
         emulator_executeOp(p_state, opcode);
@@ -581,6 +581,7 @@ int emulator_executeOp(State8080* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xf5:
+        op_PUSH(p_state, opcode);
         break;
     case 0xf6:
         
