@@ -5,8 +5,8 @@
 const char* INVADERS_ROM = "../roms/invaders";
 
 int main(int argc, char** argv){
-    State8080* emu = emulator_Init();
-    int bytes_read = emulator_Load(emu, INVADERS_ROM);
+    Emulator8080* emu = emulator_init();
+    int bytes_read = emulator_load(emu, INVADERS_ROM);
     
     if ( bytes_read == -1){
         printf("Failed to load file into emulator\n");
@@ -21,7 +21,7 @@ int main(int argc, char** argv){
     }*/
 
     
-    emulator_Start(emu);
+    emulator_start(emu);
 
 
 

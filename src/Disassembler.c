@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#include "emulator_disassembler.h"
+#include "Disassembler.h"
 
 
 int processBuffer(byte codes[], int buffer_size){

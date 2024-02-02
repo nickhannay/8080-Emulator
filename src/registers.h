@@ -1,9 +1,10 @@
 #ifndef _REGISTER_H
 #define _REGISTER_H
 
-#include "shared.h"
-#include "8080-Emulator.h"
+#include <stdlib.h>
 #include <stdint.h>
+#include "data_types.h"
+#include "cpu.h"
 
 typedef struct RegisterPair{
     byte* high;
@@ -14,9 +15,12 @@ typedef struct RegisterPair{
 
 
 RegisterPair* createRegPair();
+
 void deleteRegPair(RegisterPair* rp);
-RegisterPair* extractRegPair(State8080* p_state, byte opcode);
-byte* extractReg(State8080* p_state, byte opcode);
+
+RegisterPair* extractRegPair(CPUState* p_state, byte opcode);
+
+byte* extractReg(CPUState* p_state, byte opcode);
 
 
 #endif

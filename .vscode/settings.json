@@ -3,6 +3,13 @@
         "*.ejs": "html",
         "8080-emulator.h": "c",
         "cstddef": "c",
-        "functional": "c"
+        "functional": "c",
+        "disassembler.h": "c",
+        "registers.h": "c",
+        "cpu.h": "c",
+        "unistd.h": "c",
+        "operations.h": "c",
+        "stat.h": "c",
+        "stdlib.h": "c"
     }
 }

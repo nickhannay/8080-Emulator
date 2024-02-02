@@ -1,14 +1,13 @@
-#include "8080-Emulator.h"
-#include "operations.h"
-#include "registers.h"
-#include "shared.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
+
+#include "operations.h"
+#include "registers.h"
 
 
-/* ********************************************* OPERATIONS ***************************************************** */
 
-int op_LXI(State8080* p_state, byte opcode){
+int op_LXI(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     if(!rp -> sp){
         *rp->high = p_state -> memory[p_state -> pc + 1];
@@ -23,7 +22,7 @@ int op_LXI(State8080* p_state, byte opcode){
 }
 
 
-int op_LDAX(State8080* p_state, byte opcode){
+int op_LDAX(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
 
     p_state -> reg_a = p_state -> memory[u8_to_u16(*rp->high, *rp -> low)];
@@ -33,7 +32,7 @@ int op_LDAX(State8080* p_state, byte opcode){
 }
 
 
-int op_STAX(State8080* p_state, byte opcode){
+int op_STAX(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     
     p_state -> memory[u8_to_u16(*rp->high, *rp -> low)] = p_state -> reg_a;
@@ -42,7 +41,7 @@ int op_STAX(State8080* p_state, byte opcode){
 }
 
 
-int op_DCR(State8080* p_state, byte opcode){
+int op_DCR(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode);
     byte tmp = *r;
     *r -= 1;
@@ -53,14 +52,14 @@ int op_DCR(State8080* p_state, byte opcode){
 }
 
 
-int op_MVI(State8080* p_state, byte opcode){
+int op_MVI(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode); 
     *r = p_state -> memory[p_state -> pc];
     return 0;
 }
 
 
-int op_ADI(State8080* p_state, byte opcode){
+int op_ADI(CPUState* p_state, byte opcode){
     uint16_t immediate = p_state -> memory[p_state -> pc];
     uint16_t acc = p_state -> reg_a;
 
@@ -78,7 +77,7 @@ int op_ADI(State8080* p_state, byte opcode){
 }
 
 
-int op_CPI(State8080* p_state, byte opcode){
+int op_CPI(CPUState* p_state, byte opcode){
     uint16_t immediate = p_state -> memory[p_state -> pc];
 
     uint16_t twos_comp  = ~immediate + 1;
@@ -96,7 +95,7 @@ int op_CPI(State8080* p_state, byte opcode){
 
 
 
-int op_ANI(State8080* p_state, byte opcode){
+int op_ANI(CPUState* p_state, byte opcode){
 
     p_state -> reg_a &= p_state -> memory[p_state -> pc];
 
@@ -109,7 +108,7 @@ int op_ANI(State8080* p_state, byte opcode){
 
 
 
-int op_DAD(State8080* p_state, byte opcode){
+int op_DAD(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
 
     uint32_t src = 0;
@@ -137,7 +136,7 @@ int op_DAD(State8080* p_state, byte opcode){
 }
 
 
-int op_XCHG(State8080* p_state, byte opcode){
+int op_XCHG(CPUState* p_state, byte opcode){
     // exchange high order byte
     byte tmp = p_state -> reg_d;
     p_state -> reg_d = p_state -> reg_h;
@@ -153,7 +152,7 @@ int op_XCHG(State8080* p_state, byte opcode){
 
 
 
-int op_RAC(State8080* p_state, byte opcode){
+int op_RAC(CPUState* p_state, byte opcode){
     byte op = opcode >> 3 & 0x03;
     switch(op){
         case 0x00:
@@ -178,7 +177,7 @@ int op_RAC(State8080* p_state, byte opcode){
 }
 
 
-int op_INX(State8080* p_state, byte opcode){
+int op_INX(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     uint16_t combined = u8_to_u16(*rp -> high, *rp -> low);
     combined += 1;
@@ -190,7 +189,7 @@ int op_INX(State8080* p_state, byte opcode){
     return 0;
 }
 
-int op_STA(State8080* p_state, byte opcode){
+int op_STA(CPUState* p_state, byte opcode){
     byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
 
@@ -200,7 +199,7 @@ int op_STA(State8080* p_state, byte opcode){
 }
 
 
-int op_LDA(State8080* p_state, byte opcode){
+int op_LDA(CPUState* p_state, byte opcode){
     byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
 
@@ -209,7 +208,7 @@ int op_LDA(State8080* p_state, byte opcode){
     return 0;
 }
 
-int op_MOV(State8080* p_state, byte opcode){
+int op_MOV(CPUState* p_state, byte opcode){
     byte* reg_dst  = extractReg(p_state, opcode);
     byte* reg_src = extractReg(p_state, opcode << 3);
 
@@ -218,7 +217,7 @@ int op_MOV(State8080* p_state, byte opcode){
 }
 
 
-int op_ANA(State8080* p_state, byte opcode){
+int op_ANA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a &= *src_reg;
@@ -229,7 +228,7 @@ int op_ANA(State8080* p_state, byte opcode){
     return 0;
 }
 
-int op_XRA(State8080* p_state, byte opcode){
+int op_XRA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a ^= *src_reg;
@@ -241,7 +240,7 @@ int op_XRA(State8080* p_state, byte opcode){
 }
 
 
-int op_PUSH(State8080* p_state, byte opcode){
+int op_PUSH(CPUState* p_state, byte opcode){
     if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
         p_state -> memory[p_state -> sp - 1]  = p_state -> reg_a;
@@ -274,7 +273,7 @@ int op_PUSH(State8080* p_state, byte opcode){
 }
 
 
-int op_POP(State8080* p_state, byte opcode){
+int op_POP(CPUState* p_state, byte opcode){
     if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
         byte flags = p_state -> memory[p_state -> sp];
@@ -301,7 +300,7 @@ int op_POP(State8080* p_state, byte opcode){
 }
 
 
-int op_JNZ(State8080* p_state, byte opcode){
+int op_JNZ(CPUState* p_state, byte opcode){
     if(p_state -> cc.flag_z == 0){
         // jump
         uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
@@ -316,7 +315,7 @@ int op_JNZ(State8080* p_state, byte opcode){
 }
 
 
-int op_JMP(State8080* p_state, byte opcode){
+int op_JMP(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
         // update pc
     p_state -> pc = addr;
@@ -326,7 +325,7 @@ int op_JMP(State8080* p_state, byte opcode){
 
 
 
-int op_RET(State8080* p_state, byte opcode){
+int op_RET(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
 
     printf("Returning to %04x\n", addr);
@@ -340,7 +339,7 @@ int op_RET(State8080* p_state, byte opcode){
 
 
 
-int op_CALL(State8080* p_state, byte opcode){
+int op_CALL(CPUState* p_state, byte opcode){
     // CALL addr
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
     p_state -> pc += 2;
@@ -365,7 +364,7 @@ int op_CALL(State8080* p_state, byte opcode){
 
 
 
-int op_OUT(State8080* p_state, byte opcode){
+int op_OUT(CPUState* p_state, byte opcode){
     // TODO : IMPLEMENT
 
     return 0;
@@ -373,7 +372,7 @@ int op_OUT(State8080* p_state, byte opcode){
 
 
 
-int op_setI(State8080* p_state, byte toggle){
+int op_setI(CPUState* p_state, byte toggle){
     p_state -> int_enable = toggle;
 
     return 0;
@@ -390,11 +389,6 @@ int op_setI(State8080* p_state, byte toggle){
 
 
 
-void setFlags(struct ConditionCodes* cc,  byte* reg){
-    cc -> flag_z = *reg == 0;
-    cc -> flag_p = getParity(*reg) == 0;
-    cc -> flag_s = (*reg >> 7) & 1;
-}
 
 
 

@@ -1,45 +1,23 @@
 #ifndef _8080_EMULATOR_H
 #define _8080_EMULATOR_H
 
-#include "shared.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "cpu.h"
 
 
-struct ConditionCodes{
-    byte    flag_z:1;
-    byte    flag_s:1;
-    byte    flag_p:1;
-    byte    flag_cy:1;
-    byte    flag_ac:1;
-    byte    pad:3;
-};
-
-typedef struct State8080 {
-    byte    reg_a;
-    byte    reg_b;
-    byte    reg_c;
-    byte    reg_d;
-    byte    reg_e;
-    byte    reg_h;
-    byte    reg_l;
-    uint16_t    sp;
-    uint16_t    pc;
-    byte     *memory;
-    struct      ConditionCodes cc;
-    byte     int_enable;
-} State8080;
+typedef struct Emulator8080{
+    CPUState* cpu;
+} Emulator8080;
 
 
-State8080* emulator_Init();
 
-int emulator_Load(State8080* emu, const char* file);
 
-int emulator_Start(State8080* state);
+Emulator8080* emulator_init();
 
-int emulator_executeOp(State8080* state, byte opcode);
+int emulator_load(Emulator8080* emu, const char* file);
 
-void emulator_Terminate(State8080* emu);
+int emulator_start(Emulator8080* emu);
+
+void emulator_cleanup(Emulator8080* emu);
 
 
 

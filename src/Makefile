@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS = -g -Wall -Werror
 
-SRCS = operations.o shared.o 8080-Emulator.o registers.o emulator_disassembler.o main.o
+SRCS = operations.o cpu.o 8080-Emulator.o registers.o Disassembler.o main.o memory.o
 OBJS = $(SRCS:.c=.o)
 
 all: emu

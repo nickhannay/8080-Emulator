@@ -1,5 +1,5 @@
 #include "registers.h"
-#include <stdlib.h>
+#include "cpu.h"
 
 RegisterPair* createRegPair(){
     return ((RegisterPair*) calloc(1, sizeof(RegisterPair)));
@@ -11,7 +11,7 @@ void deleteRegPair(RegisterPair* rp){
 }
 
 
-RegisterPair* extractRegPair(State8080* p_state, byte opcode){
+RegisterPair* extractRegPair(CPUState* p_state, byte opcode){
     byte regCode = (opcode & 0x30) >> 4;
     RegisterPair* rp = createRegPair();
     rp -> sp = NULL;
@@ -39,7 +39,7 @@ RegisterPair* extractRegPair(State8080* p_state, byte opcode){
 }
 
 
-byte* extractReg(State8080* p_state, byte opcode){
+byte* extractReg(CPUState* p_state, byte opcode){
     byte regCode = (opcode & 0x38) >> 3;
     byte *reg = NULL;
     switch(regCode){
