@@ -2,6 +2,7 @@
 #define _CPU_H
 
 #include "data_types.h"
+#include "devices.h"
 #include "memory.h"
 #include <stdlib.h>
 
@@ -41,6 +42,6 @@ int cpu_cleanup(CPUState* p_state);
 
 byte cpu_fetch(CPUState* p_state);
 
-int cpu_execute(CPUState* p_state, byte opcode);
+int cpu_execute(CPUState* p_state, byte opcode, Device* devices);
 
 #endif

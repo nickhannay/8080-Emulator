@@ -12,6 +12,7 @@
 Emulator8080* emulator_init(){
     Emulator8080* emu = calloc(1, sizeof(Emulator8080));
     emu -> cpu = cpu_init();
+    emu -> devices = devices_init();
 
     return emu;
 }
@@ -29,6 +30,7 @@ int emulator_load(Emulator8080* emu, const char* file){
 
 void emulator_cleanup(Emulator8080* emu){
     cpu_cleanup(emu -> cpu);
+    devices_cleanup(emu -> devices);
 }
 
 
@@ -38,7 +40,7 @@ int emulator_start(Emulator8080* emu){
     for(int i = 0 ; i < 10000; i++) {
         byte opcode = cpu_fetch(emu -> cpu);
 
-        cpu_execute(emu -> cpu, opcode);
+        cpu_execute(emu -> cpu, opcode, emu -> devices);
     }
     
     return 0;

@@ -3,6 +3,7 @@
 
 #include "data_types.h"
 #include "cpu.h"
+#include "devices.h"
 
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
@@ -97,7 +98,9 @@ int op_CALL(CPUState* p_state, byte opcode);
 
 
 /* ****************************  IO INSTRUCTIONS *************************** */
-int op_OUT(CPUState* p_state, byte opcode);
+int op_OUT(CPUState* p_state, Device* devices);
+
+int op_IN(CPUState* p_state, Device* devices);
 
 
 

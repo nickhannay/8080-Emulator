@@ -2,10 +2,12 @@
 #define _8080_EMULATOR_H
 
 #include "cpu.h"
+#include "devices.h"
 
 
 typedef struct Emulator8080{
     CPUState* cpu;
+    Device* devices;
 } Emulator8080;
 
 

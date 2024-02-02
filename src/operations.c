@@ -364,13 +364,6 @@ int op_CALL(CPUState* p_state, byte opcode){
 
 
 
-int op_OUT(CPUState* p_state, byte opcode){
-    // TODO : IMPLEMENT
-
-    return 0;
-}
-
-
 
 int op_setI(CPUState* p_state, byte toggle){
     p_state -> int_enable = toggle;
@@ -380,7 +373,20 @@ int op_setI(CPUState* p_state, byte toggle){
 
 
 
+int op_OUT(CPUState* p_state, Device* devices){
+    byte device_id = p_state -> memory[p_state -> pc];
+    devices_write(device_id, p_state -> reg_a, devices);
 
+    return 0;
+}
+
+
+int op_IN(CPUState* p_state, Device* devices){
+    byte device_id = p_state -> memory[p_state -> pc];
+    devices_read(device_id, &p_state -> reg_a, devices);
+
+    return 0;
+}
 
 
 

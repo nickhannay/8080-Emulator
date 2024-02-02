@@ -47,7 +47,7 @@ byte cpu_fetch(CPUState* p_state){
 }
 
 
-int cpu_execute(CPUState* p_state, byte opcode){
+int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     printOpCode(p_state -> memory, p_state -> pc);
 
     p_state -> pc += 1;
@@ -476,7 +476,7 @@ int cpu_execute(CPUState* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xd3:
-        op_OUT(p_state, opcode);
+        op_OUT(p_state, devices);
         p_state -> pc += 1;
         break;
     case 0xd4:
@@ -500,6 +500,7 @@ int cpu_execute(CPUState* p_state, byte opcode){
         p_state -> pc += 2;
         break;
     case 0xdb:
+        op_IN(p_state, devices);
         p_state -> pc += 1;
         break;
     case 0xdc:
