@@ -39,6 +39,8 @@ CPUState* cpu_init();
 
 int cpu_cleanup(CPUState* p_state);
 
+byte cpu_fetch(CPUState* p_state);
+
 int cpu_execute(CPUState* p_state, byte opcode);
 
 #endif

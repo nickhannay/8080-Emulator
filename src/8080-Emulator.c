@@ -36,7 +36,7 @@ void emulator_cleanup(Emulator8080* emu){
 
 int emulator_start(Emulator8080* emu){
     for(int i = 0 ; i < 10000; i++) {
-        byte opcode = emu -> cpu -> memory[emu -> cpu ->pc];
+        byte opcode = cpu_fetch(emu -> cpu);
 
         cpu_execute(emu -> cpu, opcode);
     }

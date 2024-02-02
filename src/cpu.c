@@ -42,6 +42,10 @@ int cpu_cleanup(CPUState* p_state){
 }
 
 
+byte cpu_fetch(CPUState* p_state){
+   return p_state -> memory[p_state ->pc];
+}
+
 
 int cpu_execute(CPUState* p_state, byte opcode){
     printOpCode(p_state -> memory, p_state -> pc);
