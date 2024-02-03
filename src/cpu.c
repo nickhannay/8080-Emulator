@@ -43,15 +43,15 @@ int cpu_cleanup(CPUState* p_state){
 
 
 byte cpu_fetch(CPUState* p_state){
-   return p_state -> memory[p_state ->pc];
+   byte op = p_state -> memory[p_state ->pc];
+   printOpCode(p_state -> memory, p_state -> pc);
+   p_state -> pc += 1;
+
+   return op;
 }
 
 
 int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
-    printOpCode(p_state -> memory, p_state -> pc);
-
-    p_state -> pc += 1;
-    
     switch(opcode){
         case 0x00:
         break;

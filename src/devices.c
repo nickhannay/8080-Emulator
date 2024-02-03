@@ -24,6 +24,21 @@ void write_dev6(byte value){
 }
 
 
+void read_dev1(){
+    printf("reading from PORT: 1\n");
+    return;
+}
+
+void read_dev2(){
+    printf("reading from PORT: 2\n");
+    return;
+}
+void read_dev3(){
+    printf("reading from PORT: 3\n");
+    return;
+}
+
+
 const int NUM_DEVICES = 256;
 
 Device* devices_init(){
@@ -37,6 +52,11 @@ Device* devices_init(){
     devices[4].write =  write_dev4;
     devices[5].write =  write_dev5;
     devices[6].write =  write_dev6;
+
+    devices[1].read =  read_dev1;
+    devices[2].read =  read_dev2;
+    devices[3].read =  read_dev3;
+
 
     return devices;
 }
@@ -53,6 +73,7 @@ int devices_write(byte id, byte accumulator, Device* devices){
 
 int devices_read(byte id, byte* accumulator, Device* devices){
     // TO DO
+    devices[id].read();
 
     return 0;
 }
