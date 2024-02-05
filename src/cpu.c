@@ -24,8 +24,6 @@ void setFlags(struct ConditionCodes* cc,  byte* reg){
 CPUState* cpu_init(){
     CPUState* p_state = calloc(1, sizeof(CPUState));
     
-    // init stack
-    p_state -> sp = 0x7800;
 
     // init memory
     p_state -> memory = memory_init();

@@ -10,6 +10,7 @@
         "unistd.h": "c",
         "operations.h": "c",
         "stat.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "sdl_render.h": "c"
     }
 }

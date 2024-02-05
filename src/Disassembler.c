@@ -214,7 +214,7 @@ int printOpCode(byte codes[], int index){
         printf("DAD SP\n");
         break;
     case 0x3a:
-        printf("LDA %02x%02x\n", codes[index+2], codes[index + 1]);
+        printf("LDA %02x%02x (%04x)\n", codes[index+2], codes[index + 1], codes[u8_to_u16(codes[index + 2], codes[index + 1])] );
         opcodeSize = 3;
         break;
     case 0x3b:

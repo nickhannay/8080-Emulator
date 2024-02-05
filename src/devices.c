@@ -1,19 +1,38 @@
 #include "devices.h"
+#include "data_types.h"
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
+/**************************************** Space Invaders Specific ***************************************************/
+
+byte shift_offset = 0;
+
+uint16_t shift_reg = 0;
+
 void write_dev2(byte value){
-    printf("writing %02x to PORT: 2\n", value);
+    shift_offset = value & 0x07;
+
+    printf("writing %02x to PORT: 2 - shift offset = %d\n", value, shift_offset);
     return;
 }
+
+
 void write_dev3(byte value){
     printf("writing %02x to PORT: 3\n", value);
     return;
 }
+
+
 void write_dev4(byte value){
-    printf("writing %02x to PORT: 4\n", value);
+    shift_reg = (uint16_t) value << 8 | (shift_reg >> 8);
+
+    printf("writing %02x to PORT: 4 - shift reg = %04x\n", value, shift_reg);
     return;
 }
+
+
 void write_dev5(byte value){
     printf("writing %02x to PORT: 5\n", value);
     return;
@@ -34,9 +53,18 @@ void read_dev2(){
     return;
 }
 void read_dev3(){
+    byte value = (shift_reg >> ( 8 - shift_offset)) & 0x00ff; 
+    printf("%02x\n", value );
+    // TO DO
+
+
     printf("reading from PORT: 3\n");
     return;
 }
+
+
+/*************************************************************************************************************************************************************/
+
 
 
 const int NUM_DEVICES = 256;
