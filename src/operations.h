@@ -110,4 +110,9 @@ int op_IN(CPUState* p_state, Device* devices);
 int op_setI(CPUState* p_state, byte toggle);
 
 
+
+
+void op_unimplemented(byte opcode);
+
+
 #endif

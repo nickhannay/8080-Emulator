@@ -52,6 +52,7 @@ byte cpu_fetch(CPUState* p_state){
 int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     switch(opcode){
         case 0x00:
+        // NOP
         break;
     case 0x01:
         op_LXI(p_state, opcode);
@@ -61,8 +62,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_STAX(p_state, opcode);
         break;
     case 0x03:
+        op_unimplemented(opcode);
         break;
     case 0x04:
+        op_unimplemented(opcode);
         break;
     case 0x05:
         op_DCR(p_state, opcode);
@@ -72,6 +75,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x07:
+        op_unimplemented(opcode);
         break;
     case 0x08:
         // unsupported
@@ -83,8 +87,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_LDAX(p_state, opcode);
         break;
     case 0x0b:
+        op_unimplemented(opcode);
         break;
     case 0x0c:
+        op_unimplemented(opcode);
         break;
     case 0x0d:
         op_DCR(p_state, opcode);
@@ -110,6 +116,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_INX(p_state, opcode);
         break;
     case 0x14:
+        op_unimplemented(opcode);
         break;
     case 0x15:
         op_DCR(p_state, opcode);
@@ -119,6 +126,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x17:
+        op_unimplemented(opcode);
         break;
     case 0x18:
         // unsupported 
@@ -130,8 +138,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_LDAX(p_state, opcode);
         break;
     case 0x1b:
+        op_unimplemented(opcode);
         break;
     case 0x1c:
+        op_unimplemented(opcode);
         break;
     case 0x1d:
         op_DCR(p_state, opcode);
@@ -141,20 +151,24 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x1f:
+        op_unimplemented(opcode);
         break;
     case 0x20:
+        op_unimplemented(opcode);
         break;
     case 0x21:
         op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x22:
+        op_unimplemented(opcode);
         p_state -> pc += 2;
         break;
     case 0x23:
         op_INX(p_state, opcode);
         break;
     case 0x24:
+        op_unimplemented(opcode);
         break;
     case 0x25:
         op_DCR(p_state, opcode);
@@ -164,6 +178,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x27:
+        op_unimplemented(opcode);
         break;
     case 0x28:
         // unsupported
@@ -175,8 +190,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0x2b:
+        op_unimplemented(opcode);
         break;
     case 0x2c:
+        op_unimplemented(opcode);
         break;
     case 0x2d:
         op_DCR(p_state, opcode);
@@ -186,8 +203,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x2f:
+        op_unimplemented(opcode);
         break;
     case 0x30:
+        op_unimplemented(opcode);
         break;
     case 0x31:
         op_LXI(p_state, opcode);
@@ -201,6 +220,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_INX(p_state, opcode);
         break;
     case 0x34:
+        op_unimplemented(opcode);
         break;
     case 0x35:
         op_DCR(p_state, opcode);
@@ -210,6 +230,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x37:
+        op_unimplemented(opcode);
         break;
     case 0x38:
         // unsupported
@@ -222,8 +243,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0x3b:
+        op_unimplemented(opcode);
         break;
     case 0x3c:
+        op_unimplemented(opcode);
         break;
     case 0x3d:
         op_DCR(p_state, opcode);
@@ -233,6 +256,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 1;
         break;
     case 0x3f:
+        op_unimplemented(opcode);
         break;
     case 0x40:
     case 0x41:
@@ -291,6 +315,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_MOV(p_state, opcode);
         break;
     case 0x76:
+        op_unimplemented(opcode);
         break;
     case 0x77:
     case 0x78:

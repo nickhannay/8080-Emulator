@@ -391,6 +391,10 @@ int op_IN(CPUState* p_state, Device* devices){
 
 
 
+void op_unimplemented(byte opcode){
+    perror("INSTRUCTION %02x has not been implemented\n", opcode);
+    exit(EXIT_FAILURE);
+}
 
 
 
