@@ -62,7 +62,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_STAX(p_state, opcode);
         break;
     case 0x03:
-        op_unimplemented(opcode);
+        op_INX(p_state, opcode);
         break;
     case 0x04:
         op_unimplemented(opcode);
@@ -329,36 +329,24 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_MOV(p_state, opcode);
         break;
     case 0x80:
-        break;
     case 0x81:
-        break;
     case 0x82:
-        break;
     case 0x83:
-        break;
     case 0x84:
-        break;
     case 0x85:
-        break;
     case 0x86:
-        break;
     case 0x87:
+        op_ADD(p_state, opcode);
         break;
     case 0x88:
-        break;
     case 0x89:
-        break;
     case 0x8a:
-        break;
     case 0x8b:
-        break;
     case 0x8c:
-        break;
     case 0x8d:
-        break;
     case 0x8e:
-        break;
     case 0x8f:
+        op_ADC(p_state, opcode);
         break;
     case 0x90:
         break;
