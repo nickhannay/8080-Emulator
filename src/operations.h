@@ -31,12 +31,12 @@ int op_XRA(CPUState* p_state, byte opcode);
 
 int op_ADD(CPUState* p_state, byte opcode);
 
-int op_ADC(CPUState* p_state, byte opcode);
+int op_ADC(CPUState* p_state, byte opcode);/*
 
 int op_SUB(CPUState* p_state, byte opcode);
 
 int op_SBB(CPUState* p_state, byte opcode);
-
+*/
 
 
 /* ****************************  ROTATE ACCUMULATOR INSTRUCTIONS ******************************* */

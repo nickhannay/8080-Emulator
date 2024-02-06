@@ -5,6 +5,9 @@
 #include "devices.h"
 #include "memory.h"
 #include <stdlib.h>
+#include <stdbool.h>
+
+#define CYCLES(x) (x)
 
 struct ConditionCodes{
     byte    flag_z:1;
@@ -34,9 +37,13 @@ typedef struct CPUState {
 
 byte getParity(byte input);
 
-void setFlags(struct ConditionCodes* cc,  byte* reg);
+void cpu_setFlags(struct ConditionCodes* cc,  byte* reg);
 
-CPUState* cpu_init();
+void cpu_add(byte *src, byte *dst, CPUState* p_state);
+
+bool cpu_checkMemOp(byte opcode);
+
+CPUState* cpu_init(void);
 
 int cpu_cleanup(CPUState* p_state);
 

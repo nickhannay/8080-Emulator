@@ -11,6 +11,7 @@
         "operations.h": "c",
         "stat.h": "c",
         "stdlib.h": "c",
-        "sdl_render.h": "c"
+        "sdl_render.h": "c",
+        "devices.h": "c"
     }
 }

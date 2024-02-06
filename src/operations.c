@@ -13,12 +13,15 @@
 
 int op_DCR(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode);
-    byte tmp = *r;
     *r -= 1;
-    printf("Before: %02x --- After: %02x\n",tmp, *r );
-    setFlags(&p_state->cc, r );
+    cpu_setFlags(&p_state->cc, r );
 
-    return 0;
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(10);
+    }
+    else{
+        return CYCLES(5);
+    }
 }
 
 
@@ -35,7 +38,7 @@ int op_LDAX(CPUState* p_state, byte opcode){
     p_state -> reg_a = p_state -> memory[u8_to_u16(*rp->high, *rp -> low)];
 
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(7);
 }
 
 
@@ -44,7 +47,7 @@ int op_STAX(CPUState* p_state, byte opcode){
     
     p_state -> memory[u8_to_u16(*rp->high, *rp -> low)] = p_state -> reg_a;
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(7);
 }
 
 
@@ -52,9 +55,14 @@ int op_STAX(CPUState* p_state, byte opcode){
 int op_MOV(CPUState* p_state, byte opcode){
     byte* reg_dst  = extractReg(p_state, opcode);
     byte* reg_src = extractReg(p_state, opcode << 3);
-
     *reg_dst = *reg_src;
-    return 0;
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    }
+    else {
+        return CYCLES(5);
+    }
 }
 
 
@@ -69,29 +77,51 @@ int op_ANA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a &= *src_reg;
-    p_state -> cc.flag_ac = 0x00;
+    p_state -> cc.flag_cy = 0;
 
-    setFlags(&p_state ->cc, &p_state -> reg_a);
+    cpu_setFlags(&p_state ->cc, &p_state -> reg_a);
 
-    return 0;
+    return CYCLES(1);
 }
 
 int op_XRA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a ^= *src_reg;
-    p_state -> cc.flag_ac = 0x00;
+    p_state -> cc.flag_cy = 0;
 
-    setFlags(&p_state ->cc, &p_state -> reg_a);
+    cpu_setFlags(&p_state ->cc, &p_state -> reg_a);
 
-    return 0;
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    }
+    else {
+        return CYCLES(5);
+    }
 }
 
 int op_ADD(CPUState* p_state, byte opcode){
+    byte *src = extractReg(p_state, opcode);
+    byte *acc = &p_state -> reg_a;
+    cpu_add(src, acc, p_state);
 
-    return
+    cpu_setFlags(&p_state-> cc, acc);
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }  
+    
 }
 
+
+int op_ADC(CPUState* p_state, byte opcode){
+    byte *src = extractReg(p_state, opcode);
+    byte *acc = &p_state -> reg_a;
+    
+    cpu_add(src, acc, p_state);
+}
 
 
 
@@ -269,17 +299,12 @@ int op_MVI(CPUState* p_state, byte opcode){
 
 
 int op_ADI(CPUState* p_state, byte opcode){
-    uint16_t immediate = p_state -> memory[p_state -> pc];
-    uint16_t acc = p_state -> reg_a;
+    byte *immediate = &p_state -> memory[p_state -> pc];
+    byte *acc = &p_state -> reg_a;
 
-    uint16_t res = acc + immediate;
-    p_state -> reg_a = (byte) res;
+    cpu_add(immediate, acc, p_state);
 
-    if((res >> 8) == 1){
-        p_state -> cc.flag_cy = 1;
-    }
-
-    setFlags(&p_state->cc, &p_state -> reg_a);
+    cpu_setFlags(&p_state->cc, acc);
 
 
     return 0;
@@ -296,7 +321,7 @@ int op_CPI(CPUState* p_state, byte opcode){
     p_state -> cc.flag_cy = (cmp & 0xf0) == 0xf0;
 
     byte res = (byte) cmp;
-    setFlags(&p_state -> cc, &res);
+    cpu_setFlags(&p_state -> cc, &res);
 
 
     return 0;
@@ -310,7 +335,7 @@ int op_ANI(CPUState* p_state, byte opcode){
 
     p_state -> cc.flag_cy = 0;
 
-    setFlags(&p_state->cc, &p_state->reg_a);
+    cpu_setFlags(&p_state->cc, &p_state->reg_a);
 
     return 0;
 }

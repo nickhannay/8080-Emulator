@@ -41,6 +41,7 @@ int emulator_start(Emulator8080* emu){
         
 
         byte opcode = cpu_fetch(emu -> cpu);
+        printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1);
 
         cpu_execute(emu -> cpu, opcode, emu -> devices);
     }

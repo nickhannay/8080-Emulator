@@ -5,27 +5,43 @@
 byte getParity(byte input){
     byte ones = 0;
     for(int i = 0; i < 8 ; i++){
-        ones += (input >> i ) & 1;
+        ones += ((input >> i ) & 1);
     }
 
     return ones & 1;
 }
 
 
-void setFlags(struct ConditionCodes* cc,  byte* reg){
+bool cpu_checkMemOp(byte opcode){
+    return ((opcode & 0x07) == 0b110) || (((opcode >> 3 ) & 0x07) == 0b110);
+}
+
+
+void cpu_setFlags(struct ConditionCodes* cc,  byte* reg){
     cc -> flag_z = *reg == 0;
-    cc -> flag_p = getParity(*reg) == 0;
+    cc -> flag_p = getParity(*reg);
     cc -> flag_s = (*reg >> 7) & 1;
+}
+
+void cpu_add(byte *src, byte *dst, CPUState* p_state){ 
+
+    uint16_t res = (uint16_t) *src + (uint16_t) *dst;
+    *dst = (byte) res;
+
+    if((res >> 8) == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+    else{
+        p_state -> cc.flag_cy = 0;
+    }
 }
 
 
 
 
-CPUState* cpu_init(){
+CPUState* cpu_init(void){
     CPUState* p_state = calloc(1, sizeof(CPUState));
-    
 
-    // init memory
     p_state -> memory = memory_init();
 
     return p_state;
@@ -42,7 +58,7 @@ int cpu_cleanup(CPUState* p_state){
 
 byte cpu_fetch(CPUState* p_state){
    byte op = p_state -> memory[p_state ->pc];
-   printOpCode(p_state -> memory, p_state -> pc);
+   
    p_state -> pc += 1;
 
    return op;
