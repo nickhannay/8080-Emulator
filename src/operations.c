@@ -103,7 +103,13 @@ int op_XRA(CPUState* p_state, byte opcode){
 int op_ADD(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
-    cpu_add(src, acc, p_state);
+    uint16_t res = cpu_add(src, acc, p_state);
+    if((res >> 8) == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+    else{
+        p_state -> cc.flag_cy = 0;
+    }
 
     cpu_setFlags(&p_state-> cc, acc);
 
@@ -120,7 +126,16 @@ int op_ADC(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
     
-    cpu_add(src, acc, p_state);
+    uint16_t res = cpu_add(src, acc, p_state) + 1;
+
+    if((res >> 8) == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+    else{
+        p_state -> cc.flag_cy = 0;
+    }
+
+
 }
 
 
@@ -302,7 +317,13 @@ int op_ADI(CPUState* p_state, byte opcode){
     byte *immediate = &p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
 
-    cpu_add(immediate, acc, p_state);
+    uint16_t res = cpu_add(immediate, acc, p_state);
+    if((res >> 8) == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+    else{
+        p_state -> cc.flag_cy = 0;
+    }
 
     cpu_setFlags(&p_state->cc, acc);
 

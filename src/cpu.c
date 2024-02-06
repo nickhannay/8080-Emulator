@@ -23,17 +23,14 @@ void cpu_setFlags(struct ConditionCodes* cc,  byte* reg){
     cc -> flag_s = (*reg >> 7) & 1;
 }
 
-void cpu_add(byte *src, byte *dst, CPUState* p_state){ 
+
+
+uint16_t cpu_add(byte *src, byte *dst, CPUState* p_state){ 
 
     uint16_t res = (uint16_t) *src + (uint16_t) *dst;
     *dst = (byte) res;
 
-    if((res >> 8) == 1){
-        p_state -> cc.flag_cy = 1;
-    }
-    else{
-        p_state -> cc.flag_cy = 0;
-    }
+    return res;
 }
 
 

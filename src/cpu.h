@@ -39,7 +39,7 @@ byte getParity(byte input);
 
 void cpu_setFlags(struct ConditionCodes* cc,  byte* reg);
 
-void cpu_add(byte *src, byte *dst, CPUState* p_state);
+uint16_t cpu_add(byte *src, byte *dst, CPUState* p_state);
 
 bool cpu_checkMemOp(byte opcode);
 
