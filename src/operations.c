@@ -103,7 +103,7 @@ int op_XRA(CPUState* p_state, byte opcode){
 int op_ADD(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
-    uint16_t res = cpu_add(src, acc, p_state);
+    uint16_t res = cpu_add(src, acc);
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
@@ -126,7 +126,7 @@ int op_ADC(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
     
-    uint16_t res = cpu_add(src, acc, p_state) + 1;
+    uint16_t res = cpu_add(src, acc) +  p_state -> cc.flag_cy;
 
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
@@ -135,6 +135,14 @@ int op_ADC(CPUState* p_state, byte opcode){
         p_state -> cc.flag_cy = 0;
     }
 
+    cpu_setFlags(&p_state -> cc, acc);
+
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
 
 }
 
@@ -155,9 +163,9 @@ int op_RAC(CPUState* p_state, byte opcode){
         case 0x01:
             // RRC
             byte LSB = p_state -> reg_a & 0x01;
+            p_state -> cc.flag_cy = LSB;
             p_state -> reg_a >>= 1;
             p_state -> reg_a |= (LSB << 7);
-            p_state -> cc.flag_cy &= LSB;
             break;
         case 0x10:
             // RAL
@@ -167,7 +175,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             break;
     }
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -203,7 +211,7 @@ int op_DAD(CPUState* p_state, byte opcode){
 
 
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(10);
 
 }
 
@@ -317,7 +325,7 @@ int op_ADI(CPUState* p_state, byte opcode){
     byte *immediate = &p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
 
-    uint16_t res = cpu_add(immediate, acc, p_state);
+    uint16_t res = cpu_add(immediate, acc);
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
