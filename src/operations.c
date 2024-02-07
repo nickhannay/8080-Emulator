@@ -414,23 +414,36 @@ int op_LXI(CPUState* p_state, byte opcode){
 
 /* ****************************  DIRECT ADDRESSING INSTRUCTIONS ******************************* */
 
+/*
+    Store Accumulator Direct
+
+    The contents of the accumulator replace the byte at the memory address formed by concatenating mem[pc  + 1] (High) with mem[pc] (Low)
+
+    Condition bits affected: None
+*/
 int op_STA(CPUState* p_state, byte opcode){
-    byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state ->  pc];
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> memory[addr] = p_state -> reg_a;
-    return 0;
+    return CYCLES(13);
 }
 
+/*
+    Load Accumulator Direct
 
+    The byte at the memory address formed by concatenating mem[pc + 1 ] (HI) with mem[pc] (LOW) replaces the contents of the accumulator.
+
+    Condtion bits affected: None
+*/
 int op_LDA(CPUState* p_state, byte opcode){
-    byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state ->  pc];
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> reg_a = p_state -> memory[addr];
-    return 0;
+    return CYCLES(13);
 }
 
 
@@ -449,27 +462,40 @@ int op_LDA(CPUState* p_state, byte opcode){
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
 
+/*
+    Jump If Not Zero
+
+    If the Zero bit is 0 (most recent calculation did not result in 0), program execution continues at the memory address addr where:
+    
+    addr = mem[pc + 1] : mem[pc]
+
+    Condition bits affected: None
+*/
 int op_JNZ(CPUState* p_state, byte opcode){
     if(p_state -> cc.flag_z == 0){
-        // jump
         uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
-        // update pc
         p_state -> pc = addr;
     }
     else{
         p_state -> pc += 2;
     }
 
-    return 0;
+    return CYCLES(10);
 }
 
+/*
+    JUMP
 
+    Program execution continues unconditionally at the memory address addr, where:
+    
+    addr = mem[pc + 1] : mem[pc]
+
+    Condtion bits affected: None
+*/
 int op_JMP(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
-        // update pc
     p_state -> pc = addr;
-
-    return 0;
+    return CYCLES(10);
 }
 
 
@@ -487,9 +513,18 @@ int op_JMP(CPUState* p_state, byte opcode){
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */
 
+/*
+    CALL
+
+    A call operation is unconditionally performed to subroutine sub.
+
+    Condition bits affected: None
+*/
 int op_CALL(CPUState* p_state, byte opcode){
     // CALL addr
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
+
+    // increment PC before pushing to stack
     p_state -> pc += 2;
     
     
@@ -497,17 +532,14 @@ int op_CALL(CPUState* p_state, byte opcode){
     byte low = p_state -> pc & 0x00ff;
     byte high = (p_state -> pc & 0xff00) >> 8;
 
-    printf("calling %04x\n", u8_to_u16(high, low));
-
-    // push pc onto stack
+    // push PC onto stack
     p_state -> memory[p_state -> sp - 1] = high;
     p_state -> memory[p_state -> sp - 2] = low;
     p_state -> sp -= 2;
 
-    
     p_state -> pc = addr;
 
-    return 0;
+    return CYCLES(17);
 }
 
 
