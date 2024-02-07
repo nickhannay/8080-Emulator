@@ -311,7 +311,13 @@ int op_POP(CPUState* p_state, byte opcode){
 int op_MVI(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode); 
     *r = p_state -> memory[p_state -> pc];
-    return 0;
+    
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(10);
+    } else{
+        return CYCLES(7);
+    }
 }
 
 
@@ -330,7 +336,7 @@ int op_ADI(CPUState* p_state, byte opcode){
     cpu_setFlags(&p_state->cc, acc);
 
 
-    return 0;
+    return CYCLES(7);
 }
 
 
@@ -341,7 +347,25 @@ int op_CPI(CPUState* p_state, byte opcode){
 
     uint16_t cmp = p_state -> reg_a + twos_comp;
 
-    p_state -> cc.flag_cy = (cmp & 0xf0) == 0xf0;
+    if((immediate ^ p_state -> reg_a) & 0x80){
+        // different sign
+        if((cmp & 0x10000) == 0x10000){
+            // overflow
+            p_state -> cc.flag_cy = 1;
+        } else{
+            // no overflow
+            p_state -> cc.flag_cy = 0;
+        };
+    } else{
+        // same sign
+        if((cmp & 0x10000) == 0x10000){
+            // overflow -> no borrow
+            p_state -> cc.flag_cy = 0;
+        } else{
+            // no overflow -> borrow
+            p_state -> cc.flag_cy = 1;
+        };
+    }
 
     byte res = (byte) cmp;
     cpu_setFlags(&p_state -> cc, &res);
