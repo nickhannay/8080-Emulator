@@ -35,11 +35,11 @@ typedef struct CPUState {
 
 
 
-byte getParity(byte input);
+bool getParity(byte input);
 
 void cpu_setFlags(struct ConditionCodes* cc,  byte* reg);
 
-uint16_t cpu_add(byte *src, byte *dst, CPUState* p_state);
+uint16_t cpu_add(byte *src, byte *dst);
 
 bool cpu_checkMemOp(byte opcode);
 

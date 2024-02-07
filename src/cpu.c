@@ -2,13 +2,16 @@
 #include "operations.h"
 #include "Disassembler.h"
 
-byte getParity(byte input){
+/*
+   returns 1 if parity and 2 if parity is odd
+*/
+bool getParity(byte input){
     byte ones = 0;
     for(int i = 0; i < 8 ; i++){
         ones += ((input >> i ) & 1);
     }
 
-    return ones & 1;
+    return ones & 1 == 0 ;
 }
 
 
@@ -25,7 +28,7 @@ void cpu_setFlags(struct ConditionCodes* cc,  byte* reg){
 
 
 
-uint16_t cpu_add(byte *src, byte *dst, CPUState* p_state){ 
+uint16_t cpu_add(byte *src, byte *dst){ 
 
     uint16_t res = (uint16_t) *src + (uint16_t) *dst;
     *dst = (byte) res;
