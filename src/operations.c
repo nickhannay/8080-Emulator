@@ -227,7 +227,7 @@ int op_XCHG(CPUState* p_state, byte opcode){
     p_state -> reg_e = p_state -> reg_l;
     p_state -> reg_l = tmp; 
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -240,7 +240,7 @@ int op_INX(CPUState* p_state, byte opcode){
 
 
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(5);
 }
 
 
@@ -260,20 +260,17 @@ int op_PUSH(CPUState* p_state, byte opcode){
                      p_state -> cc.flag_s << 7;
 
         p_state -> memory[p_state -> sp - 2] = flags;
-        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
-
     }
     else {
         RegisterPair* rp = extractRegPair(p_state, opcode);
         p_state -> memory[p_state -> sp - 2] = *rp->low;
         p_state -> memory[p_state -> sp - 1] = *rp -> high;
         deleteRegPair(rp);
-        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
     }
 
     p_state -> sp -= 2;
 
-    return 0;
+    return CYCLES(11);
 }
 
 
@@ -282,7 +279,6 @@ int op_POP(CPUState* p_state, byte opcode){
         // handle PSW 
         byte flags = p_state -> memory[p_state -> sp];
         p_state -> reg_a = p_state -> memory[p_state -> sp + 1];
-        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
 
         p_state -> cc.flag_ac = flags >> 4 & 1;
         p_state -> cc.flag_cy = flags & 1;
@@ -294,13 +290,11 @@ int op_POP(CPUState* p_state, byte opcode){
         RegisterPair* rp = extractRegPair(p_state, opcode);
         *rp -> low = p_state -> memory[p_state -> sp];
         *rp -> high = p_state -> memory[p_state -> sp + 1];
-
-        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
         deleteRegPair(rp);
     }
 
     p_state -> sp += 2;
-    return 0;
+    return CYCLES(10);
 }
 
 
