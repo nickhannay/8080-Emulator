@@ -2,13 +2,16 @@
 #include "operations.h"
 #include "Disassembler.h"
 
-byte getParity(byte input){
+/*
+   returns 1 if parity and 2 if parity is odd
+*/
+bool getParity(byte input){
     byte ones = 0;
     for(int i = 0; i < 8 ; i++){
         ones += ((input >> i ) & 1);
     }
 
-    return ones & 1;
+    return ones & 1 == 0 ;
 }
 
 
@@ -25,7 +28,7 @@ void cpu_setFlags(struct ConditionCodes* cc,  byte* reg){
 
 
 
-uint16_t cpu_add(byte *src, byte *dst, CPUState* p_state){ 
+uint16_t cpu_add(byte *src, byte *dst){ 
 
     uint16_t res = (uint16_t) *src + (uint16_t) *dst;
     *dst = (byte) res;
@@ -63,28 +66,29 @@ byte cpu_fetch(CPUState* p_state){
 
 
 int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
+    int cycles = 0;
     switch(opcode){
         case 0x00:
         // NOP
         break;
     case 0x01:
-        op_LXI(p_state, opcode);
+        cycles = op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x02:
-        op_STAX(p_state, opcode);
+        cycles = op_STAX(p_state, opcode);
         break;
     case 0x03:
-        op_INX(p_state, opcode);
+        cycles = op_INX(p_state, opcode);
         break;
     case 0x04:
         op_unimplemented(opcode);
         break;
     case 0x05:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x06:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x07:
@@ -94,10 +98,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         // unsupported
         break;
     case 0x09:
-        op_DAD(p_state, opcode);
+        cycles = op_DAD(p_state, opcode);
         break;
     case 0x0a:
-        op_LDAX(p_state, opcode);
+        cycles = op_LDAX(p_state, opcode);
         break;
     case 0x0b:
         op_unimplemented(opcode);
@@ -106,36 +110,36 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x0d:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x0e:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x0f:
-        op_RAC(p_state, opcode);
+        cycles = op_RAC(p_state, opcode);
         break;
     case 0x10:
         // unsupported
         break;
     case 0x11:
-        op_LXI(p_state, opcode);
+        cycles = op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x12:
-        op_STAX(p_state, opcode);
+        cycles = op_STAX(p_state, opcode);
         break;
     case 0x13:
-        op_INX(p_state, opcode);
+        cycles = op_INX(p_state, opcode);
         break;
     case 0x14:
         op_unimplemented(opcode);
         break;
     case 0x15:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x16:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x17:
@@ -145,10 +149,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         // unsupported 
         break;
     case 0x19:
-        op_DAD(p_state, opcode);
+        cycles = op_DAD(p_state, opcode);
         break;
     case 0x1a:
-        op_LDAX(p_state, opcode);
+        cycles = op_LDAX(p_state, opcode);
         break;
     case 0x1b:
         op_unimplemented(opcode);
@@ -157,10 +161,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x1d:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x1e:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x1f:
@@ -170,7 +174,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x21:
-        op_LXI(p_state, opcode);
+        cycles = op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x22:
@@ -178,16 +182,16 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0x23:
-        op_INX(p_state, opcode);
+        cycles = op_INX(p_state, opcode);
         break;
     case 0x24:
         op_unimplemented(opcode);
         break;
     case 0x25:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x26:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x27:
@@ -197,7 +201,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         // unsupported
         break;
     case 0x29:
-        op_DAD(p_state, opcode);
+        cycles = op_DAD(p_state, opcode);
         break;
     case 0x2a:
         p_state -> pc += 2;
@@ -209,10 +213,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x2d:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x2e:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x2f:
@@ -222,24 +226,24 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x31:
-        op_LXI(p_state, opcode);
+        cycles = op_LXI(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x32:
-        op_STA(p_state, opcode);
+        cycles = op_STA(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x33:
-        op_INX(p_state, opcode);
+        cycles = op_INX(p_state, opcode);
         break;
     case 0x34:
         op_unimplemented(opcode);
         break;
     case 0x35:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x36:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x37:
@@ -249,10 +253,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         // unsupported
         break;
     case 0x39:
-        op_DAD(p_state, opcode);
+        cycles = op_DAD(p_state, opcode);
         break;
     case 0x3a:
-        op_LDA(p_state, opcode);
+        cycles = op_LDA(p_state, opcode);
         p_state -> pc += 2;
         break;
     case 0x3b:
@@ -262,10 +266,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         op_unimplemented(opcode);
         break;
     case 0x3d:
-        op_DCR(p_state, opcode);
+        cycles = op_DCR(p_state, opcode);
         break;
     case 0x3e:
-        op_MVI(p_state, opcode);
+        cycles = op_MVI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0x3f:
@@ -325,7 +329,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0x73:
     case 0x74:
     case 0x75:
-        op_MOV(p_state, opcode);
+        cycles = op_MOV(p_state, opcode);
         break;
     case 0x76:
         op_unimplemented(opcode);
@@ -339,7 +343,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0x7d:
     case 0x7e:
     case 0x7f:
-        op_MOV(p_state, opcode);
+        cycles = op_MOV(p_state, opcode);
         break;
     case 0x80:
     case 0x81:
@@ -349,7 +353,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0x85:
     case 0x86:
     case 0x87:
-        op_ADD(p_state, opcode);
+        cycles = op_ADD(p_state, opcode);
         break;
     case 0x88:
     case 0x89:
@@ -359,7 +363,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0x8d:
     case 0x8e:
     case 0x8f:
-        op_ADC(p_state, opcode);
+        cycles = op_ADC(p_state, opcode);
         break;
     case 0x90:
         break;
@@ -401,7 +405,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xa5:
     case 0xa6:
     case 0xa7:
-        op_ANA(p_state, opcode);
+        cycles = op_ANA(p_state, opcode);
         break;
     case 0xa8:
     case 0xa9:
@@ -411,7 +415,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xad:
     case 0xae:
     case 0xaf:
-        op_XRA(p_state, opcode);
+        cycles = op_XRA(p_state, opcode);
         break;
     case 0xb0:
         break;
@@ -448,22 +452,22 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xc0:
         break;
     case 0xc1:
-        op_POP(p_state, opcode);
+        cycles = op_POP(p_state, opcode);
         break;
     case 0xc2:
-        op_JNZ(p_state, opcode);
+        cycles = op_JNZ(p_state, opcode);
         break;
     case 0xc3:
-        op_JMP(p_state, opcode);
+        cycles = op_JMP(p_state, opcode);
         break;
     case 0xc4:
         p_state -> pc += 2;
         break;
     case 0xc5:
-        op_PUSH(p_state, opcode);
+        cycles = op_PUSH(p_state, opcode);
         break;
     case 0xc6:
-        op_ADI(p_state, opcode);
+        cycles = op_ADI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0xc7:
@@ -471,7 +475,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xc8:
         break;
     case 0xc9:
-        op_RET(p_state, opcode);
+        cycles = op_RET(p_state, opcode);
         break;
     case 0xca:
         p_state -> pc += 2;
@@ -483,7 +487,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0xcd:
-        op_CALL(p_state, opcode);
+        cycles = op_CALL(p_state, opcode);
         break;
     case 0xce:
         
@@ -494,20 +498,20 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xd0:
         break;
     case 0xd1:
-        op_POP(p_state, opcode);
+        cycles = op_POP(p_state, opcode);
         break;
     case 0xd2:
         p_state -> pc += 2;
         break;
     case 0xd3:
-        op_OUT(p_state, devices);
+        cycles = op_OUT(p_state, devices);
         p_state -> pc += 1;
         break;
     case 0xd4:
         p_state -> pc += 2;
         break;
     case 0xd5:
-        op_PUSH(p_state, opcode);
+        cycles = op_PUSH(p_state, opcode);
         break;
     case 0xd6:
         
@@ -524,7 +528,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0xdb:
-        op_IN(p_state, devices);
+        cycles = op_IN(p_state, devices);
         p_state -> pc += 1;
         break;
     case 0xdc:
@@ -542,7 +546,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xe0:
         break;
     case 0xe1:
-        op_POP(p_state, opcode);
+        cycles = op_POP(p_state, opcode);
         break;
     case 0xe2:
         p_state -> pc += 2;
@@ -553,10 +557,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0xe5:
-        op_PUSH(p_state, opcode);
+        cycles = op_PUSH(p_state, opcode);
         break;
     case 0xe6:
-        op_ANI(p_state, opcode);
+        cycles = op_ANI(p_state, opcode);
         p_state -> pc += 1;
         break;
     case 0xe7:
@@ -569,7 +573,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         p_state -> pc += 2;
         break;
     case 0xeb:
-        op_XCHG(p_state, opcode);
+        cycles = op_XCHG(p_state, opcode);
         break;
     case 0xec:
         p_state -> pc += 2;
@@ -586,20 +590,20 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     case 0xf0:
         break;
     case 0xf1:
-        op_POP(p_state, opcode);
+        cycles = op_POP(p_state, opcode);
         break;
     case 0xf2:
         p_state -> pc += 2;
         break;
     case 0xf3:
         // disable interrupts
-        op_setI(p_state, 0);
+        cycles = op_setI(p_state, 0);
         break;
     case 0xf4:
         p_state -> pc += 2;
         break;
     case 0xf5:
-        op_PUSH(p_state, opcode);
+        cycles = op_PUSH(p_state, opcode);
         break;
     case 0xf6:
         
@@ -616,7 +620,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xfb:
         // Enable Interrupts
-        op_setI(p_state, 1);
+        cycles = op_setI(p_state, 1);
         break;
     case 0xfc:
         p_state -> pc += 2;
@@ -631,7 +635,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     }
 
-    return 0;
+    return cycles;
 
 }
 

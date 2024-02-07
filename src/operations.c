@@ -103,7 +103,7 @@ int op_XRA(CPUState* p_state, byte opcode){
 int op_ADD(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
-    uint16_t res = cpu_add(src, acc, p_state);
+    uint16_t res = cpu_add(src, acc);
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
@@ -126,7 +126,7 @@ int op_ADC(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
     
-    uint16_t res = cpu_add(src, acc, p_state) + 1;
+    uint16_t res = cpu_add(src, acc) +  p_state -> cc.flag_cy;
 
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
@@ -135,6 +135,14 @@ int op_ADC(CPUState* p_state, byte opcode){
         p_state -> cc.flag_cy = 0;
     }
 
+    cpu_setFlags(&p_state -> cc, acc);
+
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
 
 }
 
@@ -155,9 +163,9 @@ int op_RAC(CPUState* p_state, byte opcode){
         case 0x01:
             // RRC
             byte LSB = p_state -> reg_a & 0x01;
+            p_state -> cc.flag_cy = LSB;
             p_state -> reg_a >>= 1;
             p_state -> reg_a |= (LSB << 7);
-            p_state -> cc.flag_cy &= LSB;
             break;
         case 0x10:
             // RAL
@@ -167,7 +175,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             break;
     }
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -203,7 +211,7 @@ int op_DAD(CPUState* p_state, byte opcode){
 
 
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(10);
 
 }
 
@@ -219,7 +227,7 @@ int op_XCHG(CPUState* p_state, byte opcode){
     p_state -> reg_e = p_state -> reg_l;
     p_state -> reg_l = tmp; 
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -232,7 +240,7 @@ int op_INX(CPUState* p_state, byte opcode){
 
 
     deleteRegPair(rp);
-    return 0;
+    return CYCLES(5);
 }
 
 
@@ -252,20 +260,17 @@ int op_PUSH(CPUState* p_state, byte opcode){
                      p_state -> cc.flag_s << 7;
 
         p_state -> memory[p_state -> sp - 2] = flags;
-        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
-
     }
     else {
         RegisterPair* rp = extractRegPair(p_state, opcode);
         p_state -> memory[p_state -> sp - 2] = *rp->low;
         p_state -> memory[p_state -> sp - 1] = *rp -> high;
         deleteRegPair(rp);
-        printf("pushed: %04x onto stack\n", u8_to_u16(p_state -> memory [p_state -> sp - 1],p_state -> memory[p_state -> sp - 2]));
     }
 
     p_state -> sp -= 2;
 
-    return 0;
+    return CYCLES(11);
 }
 
 
@@ -274,7 +279,6 @@ int op_POP(CPUState* p_state, byte opcode){
         // handle PSW 
         byte flags = p_state -> memory[p_state -> sp];
         p_state -> reg_a = p_state -> memory[p_state -> sp + 1];
-        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
 
         p_state -> cc.flag_ac = flags >> 4 & 1;
         p_state -> cc.flag_cy = flags & 1;
@@ -286,13 +290,11 @@ int op_POP(CPUState* p_state, byte opcode){
         RegisterPair* rp = extractRegPair(p_state, opcode);
         *rp -> low = p_state -> memory[p_state -> sp];
         *rp -> high = p_state -> memory[p_state -> sp + 1];
-
-        printf("popped: %04x off of stack\n", u8_to_u16(p_state -> memory [p_state -> sp + 1],p_state -> memory[p_state -> sp]));
         deleteRegPair(rp);
     }
 
     p_state -> sp += 2;
-    return 0;
+    return CYCLES(10);
 }
 
 
@@ -309,7 +311,13 @@ int op_POP(CPUState* p_state, byte opcode){
 int op_MVI(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode); 
     *r = p_state -> memory[p_state -> pc];
-    return 0;
+    
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(10);
+    } else{
+        return CYCLES(7);
+    }
 }
 
 
@@ -317,7 +325,7 @@ int op_ADI(CPUState* p_state, byte opcode){
     byte *immediate = &p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
 
-    uint16_t res = cpu_add(immediate, acc, p_state);
+    uint16_t res = cpu_add(immediate, acc);
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
@@ -328,7 +336,7 @@ int op_ADI(CPUState* p_state, byte opcode){
     cpu_setFlags(&p_state->cc, acc);
 
 
-    return 0;
+    return CYCLES(7);
 }
 
 
@@ -339,17 +347,37 @@ int op_CPI(CPUState* p_state, byte opcode){
 
     uint16_t cmp = p_state -> reg_a + twos_comp;
 
-    p_state -> cc.flag_cy = (cmp & 0xf0) == 0xf0;
+    if((immediate ^ p_state -> reg_a) & 0x80){
+        // different sign
+        if((cmp & 0x10000) == 0x10000){
+            // overflow
+            p_state -> cc.flag_cy = 1;
+        } else{
+            // no overflow
+            p_state -> cc.flag_cy = 0;
+        };
+    } else{
+        // same sign
+        if((cmp & 0x10000) == 0x10000){
+            // overflow -> no borrow
+            p_state -> cc.flag_cy = 0;
+        } else{
+            // no overflow -> borrow
+            p_state -> cc.flag_cy = 1;
+        };
+    }
 
     byte res = (byte) cmp;
     cpu_setFlags(&p_state -> cc, &res);
 
 
-    return 0;
+    return CYCLES(7);
 }
 
 
-
+/*
+    A bitwise AND operation is perfromed between the Accumulator and 1 byte of Immediate data
+*/
 int op_ANI(CPUState* p_state, byte opcode){
 
     p_state -> reg_a &= p_state -> memory[p_state -> pc];
@@ -358,10 +386,14 @@ int op_ANI(CPUState* p_state, byte opcode){
 
     cpu_setFlags(&p_state->cc, &p_state->reg_a);
 
-    return 0;
+    return CYCLES(7);
 }
 
+/*
+    Loads 2 bytes of Immediate data into the register pair specefied.
 
+    Condition bits affected: None
+*/
 int op_LXI(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     if(!rp -> sp){
@@ -373,17 +405,8 @@ int op_LXI(CPUState* p_state, byte opcode){
     }
     
     deleteRegPair(rp);
-    return 0; 
+    return CYCLES(10); 
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -391,23 +414,36 @@ int op_LXI(CPUState* p_state, byte opcode){
 
 /* ****************************  DIRECT ADDRESSING INSTRUCTIONS ******************************* */
 
+/*
+    Store Accumulator Direct
+
+    The contents of the accumulator replace the byte at the memory address formed by concatenating mem[pc  + 1] (High) with mem[pc] (Low)
+
+    Condition bits affected: None
+*/
 int op_STA(CPUState* p_state, byte opcode){
-    byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state ->  pc];
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> memory[addr] = p_state -> reg_a;
-    return 0;
+    return CYCLES(13);
 }
 
+/*
+    Load Accumulator Direct
 
+    The byte at the memory address formed by concatenating mem[pc + 1 ] (HI) with mem[pc] (LOW) replaces the contents of the accumulator.
+
+    Condtion bits affected: None
+*/
 int op_LDA(CPUState* p_state, byte opcode){
-    byte low = p_state -> memory[p_state ->  pc];
     byte high = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state ->  pc];
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> reg_a = p_state -> memory[addr];
-    return 0;
+    return CYCLES(13);
 }
 
 
@@ -426,27 +462,40 @@ int op_LDA(CPUState* p_state, byte opcode){
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
 
+/*
+    Jump If Not Zero
+
+    If the Zero bit is 0 (most recent calculation did not result in 0), program execution continues at the memory address addr where:
+    
+    addr = mem[pc + 1] : mem[pc]
+
+    Condition bits affected: None
+*/
 int op_JNZ(CPUState* p_state, byte opcode){
     if(p_state -> cc.flag_z == 0){
-        // jump
         uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
-        // update pc
         p_state -> pc = addr;
     }
     else{
         p_state -> pc += 2;
     }
 
-    return 0;
+    return CYCLES(10);
 }
 
+/*
+    JUMP
 
+    Program execution continues unconditionally at the memory address addr, where:
+    
+    addr = mem[pc + 1] : mem[pc]
+
+    Condtion bits affected: None
+*/
 int op_JMP(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
-        // update pc
     p_state -> pc = addr;
-
-    return 0;
+    return CYCLES(10);
 }
 
 
@@ -464,9 +513,18 @@ int op_JMP(CPUState* p_state, byte opcode){
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */
 
+/*
+    CALL
+
+    A call operation is unconditionally performed to subroutine sub.
+
+    Condition bits affected: None
+*/
 int op_CALL(CPUState* p_state, byte opcode){
     // CALL addr
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
+
+    // increment PC before pushing to stack
     p_state -> pc += 2;
     
     
@@ -474,17 +532,14 @@ int op_CALL(CPUState* p_state, byte opcode){
     byte low = p_state -> pc & 0x00ff;
     byte high = (p_state -> pc & 0xff00) >> 8;
 
-    printf("calling %04x\n", u8_to_u16(high, low));
-
-    // push pc onto stack
+    // push PC onto stack
     p_state -> memory[p_state -> sp - 1] = high;
     p_state -> memory[p_state -> sp - 2] = low;
     p_state -> sp -= 2;
 
-    
     p_state -> pc = addr;
 
-    return 0;
+    return CYCLES(17);
 }
 
 
@@ -502,15 +557,21 @@ int op_CALL(CPUState* p_state, byte opcode){
 
 /* ****************************  RETURN FROM SUBROUTINE INSTRUCTIONS *************************** */
 
+/*
+    Return
+
+    A return operation is unconditionally performed. Thus, execution proceeds with the instruction immediately following the last call instruction.
+
+    Condition bits affected: None
+*/
 int op_RET(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
 
-    printf("Returning to %04x\n", addr);
     p_state -> sp += 2;
 
     p_state -> pc = addr;
 
-    return 0;
+    return CYCLES(10);
 }
 
 
@@ -521,10 +582,21 @@ int op_RET(CPUState* p_state, byte opcode){
 
 /* ****************************  INTERRUPT ENABLE/DISABLE INSTRUCTIONS *************************** */
 
+/*
+    Wrapper around EI and DI, where toggle is used control flow
+
+    toggle 1 (EI):
+    This instruction sets the INTE flip-flop, enabling the CPU to recognize and respond to interrupts
+
+    toggle 0 (DI):
+    This instruction resets the INTE flip-flop, causing the CPU to ignore all interrupts
+
+    Condition bits affected: None
+*/
 int op_setI(CPUState* p_state, byte toggle){
     p_state -> int_enable = toggle;
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -539,19 +611,36 @@ int op_setI(CPUState* p_state, byte toggle){
 
 /* ****************************  I/O INSTRUCTIONS *************************** */
 
+/*
+    Output
+
+    The contents of the accumulator are sent to output device number exp
+
+    exp : mem[PC]
+
+    Condition bits affected: None
+*/
 int op_OUT(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_write(device_id, p_state -> reg_a, devices);
 
-    return 0;
+    return CYCLES(10);
 }
 
+/*
+    Input
 
+    An eight-bit data byte is read from input device number exp and replaces the contents of the accumulator.
+
+    exp: mem[PC]
+
+    Condition bits affected: None
+*/
 int op_IN(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_read(device_id, &p_state -> reg_a, devices);
 
-    return 0;
+    return CYCLES(10);
 }
 
 
