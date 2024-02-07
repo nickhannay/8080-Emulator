@@ -19,9 +19,11 @@ int op_STC(CPUState* p_state);
 
 /* ****************************  SINGLE REGISTER INSTRUCTIONS *************************** */
 
+int op_INR(CPUState* p_state, byte opcode);
+
 int op_DCR(CPUState* p_state, byte opcode);
 
-
+int op_CMA(CPUState* p_state);
 
 /* ****************************  DATA TRANSFER INSTRUCTIONS ******************************* */
 

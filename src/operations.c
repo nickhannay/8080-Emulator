@@ -52,9 +52,62 @@ int op_STC(CPUState* p_state){
 
 /* ****************************  SINGLE REGISTER INSTRUCTIONS *************************** */
 
+/*
+    Increment Register or Memory
+
+    The specified register or memory byte is incremented by one.
+
+    Condtion bits affected: Zero, Sign, Parity, Aux Carry
+*/
+int op_INR(CPUState* p_state, byte opcode){
+    byte *reg = extractReg(p_state, opcode);
+
+    byte nib1 = *reg & 0x0f;
+
+
+    *reg += 1;
+
+
+    if(((nib1 + 1) & 0x10) == 0x10){
+        p_state -> cc.flag_ac = 1;
+    }
+    else{
+        p_state -> cc.flag_ac = 0;
+    }
+
+    cpu_setFlags(&p_state -> cc, reg); 
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(10);
+    }
+    else{
+        return CYCLES(5);
+    }
+
+}
+
+/*
+    Decrement Register or Memory
+
+    The specified register or memory byte is decremented by one.
+
+    Condtion bits affected: Zero, Sign, Parity, Aux Carry
+*/
 int op_DCR(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode);
+
+    byte low_nib = *r & 0x0f;
+
+
+
     *r -= 1;
+
+    if(((low_nib - 1) & 0x10) == 0x10){
+        p_state -> cc.flag_ac = 0;
+    }
+    else{
+        p_state -> cc.flag_ac = 1;
+    }
     cpu_setFlags(&p_state->cc, r );
 
     if(cpu_checkMemOp(opcode)){
@@ -65,6 +118,58 @@ int op_DCR(CPUState* p_state, byte opcode){
     }
 }
 
+/*
+    Decimal Adjust Register
+
+    The 8 bit hex number in the accumulator is adjusted to form two 4 digit BCD decimal digits
+
+    Condition bits affected: ALL
+*/
+int op_DAA(CPUState* p_state, byte opcode){
+
+    byte low_nibble = p_state -> reg_a & 0x0f;
+    byte hi_nibble = p_state -> (reg_a & 0xf0) >> 4;
+    byte *acc = &p_state->reg_a;
+
+    if(low_nibble > 9 || p_state -> cc.flag_ac == 1){
+        if(((low_nibble + 6) & 0x10) == 0x10){
+            p_state -> cc.flag_ac = 1;
+        }
+        else{
+            p_state -> cc.flag_ac = 0;
+        } 
+
+        *acc += 6;
+    }
+    if(hi_nibble > 9 || p_state -> cc.flag_cy == 1){
+        if((hi_nibble += 6) & 0x10 == 0x10){
+            p_state -> cc.flag_cy = 1;
+        }
+
+        *acc &= 0x0f;
+        *acc |= (hi_nibble << 4);
+
+    }
+
+    cpu_setFlags(&p_state -> cc, acc);
+
+    return CYCLES(4);
+
+}
+
+/*
+    Complement Accumulator
+
+    Each bit of the contents of the accumulator is complemented (producing the one's complement)
+
+    Condition bits affected: None
+*/
+int op_CMA(CPUState* p_state){
+
+    p_state -> reg_a = ~p_state -> reg_a;
+
+    return CYCLES(4);
+}
 
 
 
