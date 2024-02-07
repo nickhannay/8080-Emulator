@@ -7,6 +7,16 @@
 
 
 
+
+/* ****************************  CARRY BIT INSTRUCTIONS *************************** */
+
+int op_CMC(CPUState* p_state);
+
+int op_STC(CPUState* p_state);
+
+
+
+
 /* ****************************  SINGLE REGISTER INSTRUCTIONS *************************** */
 
 int op_DCR(CPUState* p_state, byte opcode);

@@ -6,6 +6,47 @@
 #include "registers.h"
 
 
+/* ****************************  CARRY BIT INSTRUCTIONS *************************** */
+
+/*
+    Complement Carry
+
+    If the Carry bit = 0, it is set to 1. If the Carry bit = 1, it is reset to O
+
+    Condtion bits affected: Carry
+*/
+int op_CMC(CPUState* p_state){
+    p_state -> cc.flag_cy = ~p_state -> cc.flag_cy;
+
+    return CYCLES(4);
+}
+
+/*
+    Set Carry
+
+    The carry bit is set to 1.
+
+    Condtion bits affected: Carry
+*/
+int op_STC(CPUState* p_state){
+    p_state -> cc.flag_cy = 1;
+
+    return CYCLES(4);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
