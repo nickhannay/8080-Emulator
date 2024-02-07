@@ -25,6 +25,10 @@ int op_DCR(CPUState* p_state, byte opcode);
 
 int op_CMA(CPUState* p_state);
 
+int op_DAA(CPUState* p_state);
+
+
+
 /* ****************************  DATA TRANSFER INSTRUCTIONS ******************************* */
 
 int op_MOV(CPUState* p_state, byte opcode);

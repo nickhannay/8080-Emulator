@@ -119,16 +119,30 @@ int op_DCR(CPUState* p_state, byte opcode){
 }
 
 /*
+    Complement Accumulator
+
+    Each bit of the contents of the accumulator is complemented (producing the one's complement)
+
+    Condition bits affected: None
+*/
+int op_CMA(CPUState* p_state){
+
+    p_state -> reg_a = ~p_state -> reg_a;
+
+    return CYCLES(4);
+}
+
+/*
     Decimal Adjust Register
 
     The 8 bit hex number in the accumulator is adjusted to form two 4 digit BCD decimal digits
 
-    Condition bits affected: ALL
+    Condition bits affected: All
 */
-int op_DAA(CPUState* p_state, byte opcode){
+int op_DAA(CPUState* p_state){
 
     byte low_nibble = p_state -> reg_a & 0x0f;
-    byte hi_nibble = p_state -> (reg_a & 0xf0) >> 4;
+    byte hi_nibble = (p_state -> reg_a & 0xf0) >> 4;
     byte *acc = &p_state->reg_a;
 
     if(low_nibble > 9 || p_state -> cc.flag_ac == 1){
@@ -157,19 +171,18 @@ int op_DAA(CPUState* p_state, byte opcode){
 
 }
 
-/*
-    Complement Accumulator
 
-    Each bit of the contents of the accumulator is complemented (producing the one's complement)
 
-    Condition bits affected: None
-*/
-int op_CMA(CPUState* p_state){
 
-    p_state -> reg_a = ~p_state -> reg_a;
 
-    return CYCLES(4);
-}
+
+
+
+
+
+
+
+
 
 
 
@@ -178,26 +191,14 @@ int op_CMA(CPUState* p_state){
 
 /* ****************************  DATA TRANSFER INSTRUCTIONS ******************************* */
 
-int op_LDAX(CPUState* p_state, byte opcode){
-    RegisterPair* rp = extractRegPair(p_state, opcode);
+/*
+    MOV
 
-    p_state -> reg_a = p_state -> memory[u8_to_u16(*rp->high, *rp -> low)];
+    One byte of data is moved from the register specified by src (the source register) to the register specified by dst (the destination register). 
+    The data replaces the contents of the destination register; the source remains unchanged
 
-    deleteRegPair(rp);
-    return CYCLES(7);
-}
-
-
-int op_STAX(CPUState* p_state, byte opcode){
-    RegisterPair* rp = extractRegPair(p_state, opcode);
-    
-    p_state -> memory[u8_to_u16(*rp->high, *rp -> low)] = p_state -> reg_a;
-    deleteRegPair(rp);
-    return CYCLES(7);
-}
-
-
-
+    Condition bits affected: None
+*/
 int op_MOV(CPUState* p_state, byte opcode){
     byte* reg_dst  = extractReg(p_state, opcode);
     byte* reg_src = extractReg(p_state, opcode << 3);
@@ -210,6 +211,45 @@ int op_MOV(CPUState* p_state, byte opcode){
         return CYCLES(5);
     }
 }
+
+/*
+    Store Accumulator
+
+    The contents of the accumulator are stored in the memory location addressed by registers Band C, or by registers 0 and E
+
+    Condition bits affected: None
+*/
+int op_STAX(CPUState* p_state, byte opcode){
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+    
+    p_state -> memory[u8_to_u16(*rp->high, *rp -> low)] = p_state -> reg_a;
+    deleteRegPair(rp);
+    return CYCLES(7);
+}
+
+/*
+    Load Accumulator
+
+    The contents of the memory location addressed by registers Band C, or by registers 0 and E, replace the contents of the accumulator
+
+    Condition bits affected: None
+*/
+int op_LDAX(CPUState* p_state, byte opcode){
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+
+    p_state -> reg_a = p_state -> memory[u8_to_u16(*rp->high, *rp -> low)];
+
+    deleteRegPair(rp);
+    return CYCLES(7);
+}
+
+
+
+
+
+
+
+
 
 
 
