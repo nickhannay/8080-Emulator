@@ -557,15 +557,21 @@ int op_CALL(CPUState* p_state, byte opcode){
 
 /* ****************************  RETURN FROM SUBROUTINE INSTRUCTIONS *************************** */
 
+/*
+    Return
+
+    A return operation is unconditionally performed. Thus, execution proceeds with the instruction immediately following the last call instruction.
+
+    Condition bits affected: None
+*/
 int op_RET(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
 
-    printf("Returning to %04x\n", addr);
     p_state -> sp += 2;
 
     p_state -> pc = addr;
 
-    return 0;
+    return CYCLES(10);
 }
 
 
@@ -576,10 +582,21 @@ int op_RET(CPUState* p_state, byte opcode){
 
 /* ****************************  INTERRUPT ENABLE/DISABLE INSTRUCTIONS *************************** */
 
+/*
+    Wrapper around EI and DI, where toggle is used control flow
+
+    toggle 1 (EI):
+    This instruction sets the INTE flip-flop, enabling the CPU to recognize and respond to interrupts
+
+    toggle 0 (DI):
+    This instruction resets the INTE flip-flop, causing the CPU to ignore all interrupts
+
+    Condition bits affected: None
+*/
 int op_setI(CPUState* p_state, byte toggle){
     p_state -> int_enable = toggle;
 
-    return 0;
+    return CYCLES(4);
 }
 
 
@@ -594,19 +611,36 @@ int op_setI(CPUState* p_state, byte toggle){
 
 /* ****************************  I/O INSTRUCTIONS *************************** */
 
+/*
+    Output
+
+    The contents of the accumulator are sent to output device number exp
+
+    exp : mem[PC]
+
+    Condition bits affected: None
+*/
 int op_OUT(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_write(device_id, p_state -> reg_a, devices);
 
-    return 0;
+    return CYCLES(10);
 }
 
+/*
+    Input
 
+    An eight-bit data byte is read from input device number exp and replaces the contents of the accumulator.
+
+    exp: mem[PC]
+
+    Condition bits affected: None
+*/
 int op_IN(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_read(device_id, &p_state -> reg_a, devices);
 
-    return 0;
+    return CYCLES(10);
 }
 
 
