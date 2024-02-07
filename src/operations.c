@@ -371,11 +371,13 @@ int op_CPI(CPUState* p_state, byte opcode){
     cpu_setFlags(&p_state -> cc, &res);
 
 
-    return 0;
+    return CYCLES(7);
 }
 
 
-
+/*
+    A bitwise AND operation is perfromed between the Accumulator and 1 byte of Immediate data
+*/
 int op_ANI(CPUState* p_state, byte opcode){
 
     p_state -> reg_a &= p_state -> memory[p_state -> pc];
@@ -384,10 +386,14 @@ int op_ANI(CPUState* p_state, byte opcode){
 
     cpu_setFlags(&p_state->cc, &p_state->reg_a);
 
-    return 0;
+    return CYCLES(7);
 }
 
+/*
+    Loads 2 bytes of Immediate data into the register pair specefied.
 
+    Condition bits affected: None
+*/
 int op_LXI(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     if(!rp -> sp){
@@ -399,17 +405,8 @@ int op_LXI(CPUState* p_state, byte opcode){
     }
     
     deleteRegPair(rp);
-    return 0; 
+    return CYCLES(10); 
 }
-
-
-
-
-
-
-
-
-
 
 
 
