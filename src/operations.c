@@ -606,6 +606,14 @@ int op_RAC(CPUState* p_state, byte opcode){
 
 /* ****************************  REGISTER PAIR INSTRUCTIONS ******************************* */
 
+/*
+    Double Add
+
+    The 16-bit number in the specified register pair is added to the 16-bit number held in the H and L
+    registers using two's complement arithmetic. The result replaces the contents of the Hand L registers
+
+    Condtion bits affected: Carry
+*/
 int op_DAD(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
 
@@ -633,7 +641,14 @@ int op_DAD(CPUState* p_state, byte opcode){
 
 }
 
+/*
+    Exchange Registers
 
+    The 16 bits of data held in the Hand L registers are exchanged with the 16 bits of data held in the
+    D and E registers.
+
+    Condition bits affected: None
+*/
 int op_XCHG(CPUState* p_state, byte opcode){
     // exchange high order byte
     byte tmp = p_state -> reg_d;
@@ -648,7 +663,13 @@ int op_XCHG(CPUState* p_state, byte opcode){
     return CYCLES(4);
 }
 
+/*
+    Increment Register Pair
 
+    The 16-bit number held in the specified register pair is incremented by one
+
+    Condition bits affected: None
+*/
 int op_INX(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     uint16_t combined = u8_to_u16(*rp -> high, *rp -> low);
@@ -662,7 +683,13 @@ int op_INX(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Decrement Register Pair
 
+    The 16-bit number held in the specified register pair is decremented by one
+
+    Condition bits affected: None
+*/
 int op_DCX(CPUState* p_state, byte opcode){
     RegisterPair* rp = extractRegPair(p_state, opcode);
     uint16_t combined = u8_to_u16(*rp -> high, *rp -> low);
@@ -677,6 +704,14 @@ int op_DCX(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Push Data Onto Stack
+
+    The contents of the specified register pair are saved in two bytes of memory 
+    indicated by the stack pointer SP
+
+    Condition bits affected: None
+*/
 int op_PUSH(CPUState* p_state, byte opcode){
     if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
@@ -706,7 +741,19 @@ int op_PUSH(CPUState* p_state, byte opcode){
     return CYCLES(11);
 }
 
+/*
+    Pop Data Off Stack
 
+    The contents of the specified register pair are restored from two bytes of memory indicated by the
+    stack pointer SP. The byte of data at the memory address indicated by the stack pointer is loaded into the second
+    register of the register pair; the byte of data at the address one greater than the address indicated by the stack pointer
+    is loaded into the first register of the pair. If register pair PSW is specified, the byte of data indicated by the contents
+    of the stack pointer plus one is used to restore the values of the five condition bits 
+    (Carry, Zero, Sign, Parity, and Auxiliary Carry) using the format described in the last section
+
+    Condition bits affected: If register pair PSW is specified, Carry, Sign, Zero, Parity, and Auxiliary Carry may be
+                             changed. Otherwise, none are affected.
+*/
 int op_POP(CPUState* p_state, byte opcode){
     if((opcode & 0x30) >> 4 == 0x03){
         // handle PSW 
@@ -731,8 +778,44 @@ int op_POP(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Exchange Stack 
+
+    The contents of the L register are exchanged with the contents of the memory byte whose address is held in the stack pointer SP. 
+    The contents of the H register are exchanged with the contents of the memory byte whose address is one greater than that held in the stack pointer.
+
+    Condition bits affected: None
+*/
+int op_XTHL(CPUState* p_state){
+    byte tmp_low = p_state -> reg_l;
+    byte tmp_high = p_state -> reg_h;
+
+    p_state -> reg_l = p_state -> memory[p_state -> sp];
+    p_state -> reg_h = p_state -> memory[p_state -> sp + 1];
+
+    p_state -> memory[p_state -> sp] = tmp_low;
+    p_state -> memory[p_state -> sp + 1] = tmp_high;
+
+    return CYCLES(18);
 
 
+}
+
+
+/*
+    Load SP from H and L
+
+    The 16 bits of data held in the Hand L registers replace the contents of the stack pointer SP. 
+    The contents of the Hand L registers are unchanged
+
+    Conditon bits affected: None
+*/
+int op_SPHL(CPUState *p_state){
+    p_state -> memory[p_state -> sp] = p_state -> reg_l;
+    p_state -> memory[p_state -> sp + 1] = p_state -> reg_h;
+
+    return CYCLES(5);
+}
 
 
 

@@ -79,9 +79,9 @@ int op_XCHG(CPUState* p_state, byte opcode);
 
 int op_DCX(CPUState* p_state, byte opcode);
 
-int op_XTHL(CPUState* p_state, byte opcode);
+int op_XTHL(CPUState* p_state);
 
-
+int op_SPHL(CPUState *p_state);
 
 /* ****************************  IMMEDIATE INSTRUCTIONS ******************************* */
 
