@@ -561,6 +561,10 @@ int op_RAC(CPUState* p_state, byte opcode){
     switch(op){
         case 0x00:
             // RLC
+            byte MSB = p_state -> reg_a & 0x80;
+            p_state -> cc.flag_cy = MSB;
+            p_state -> reg_a <<= 1;
+            p_state -> reg_a |= (MSB >> 7);
             break;
         case 0x01:
             // RRC
