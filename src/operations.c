@@ -142,7 +142,7 @@ int op_CMA(CPUState* p_state){
 int op_DAA(CPUState* p_state){
 
     byte low_nibble = p_state -> reg_a & 0x0f;
-    byte hi_nibble = (p_state -> reg_a & 0xf0) >> 4;
+    
     byte *acc = &p_state->reg_a;
 
     if(low_nibble > 9 || p_state -> cc.flag_ac == 1){
@@ -155,8 +155,10 @@ int op_DAA(CPUState* p_state){
 
         *acc += 6;
     }
+
+    byte hi_nibble = (*acc & 0xf0) >> 4;
     if(hi_nibble > 9 || p_state -> cc.flag_cy == 1){
-        if((hi_nibble += 6) & 0x10 == 0x10){
+        if(((hi_nibble += 6) & 0x10) == 0x10){
             p_state -> cc.flag_cy = 1;
         }
 
@@ -259,23 +261,42 @@ int op_LDAX(CPUState* p_state, byte opcode){
 
 /* *******************  REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS ****************** */
 
+/*
+    Logical and register or Memory with Accumulator
+
+    The specified byte is logically ANDed bit by bit with the contents of the accumulator.
+     The Carry bit is reset to zero
+
+    Condition bits affected: Carry, Zero, Sign, Parity
+*/
 int op_ANA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a &= *src_reg;
-    p_state -> cc.flag_cy = 0;
 
+    p_state -> cc.flag_ac = 0;
+    p_state -> cc.flag_cy = 0;
     cpu_setFlags(&p_state ->cc, &p_state -> reg_a);
 
     return CYCLES(1);
 }
 
+
+/*
+    Logical Exclusive-Or Register to Memory With Accumulator (0 Accumulator)
+
+    The specified byte is EXCLUSIVE-ORed bit by bit with the contents of the accumulator. 
+    The Carry bit is reset to zero.
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
 int op_XRA(CPUState* p_state, byte opcode){
 
     byte* src_reg = extractReg(p_state, opcode << 3);
     p_state -> reg_a ^= *src_reg;
-    p_state -> cc.flag_cy = 0;
 
+    p_state -> cc.flag_cy = 0;
+    p_state -> cc.flag_ac = 0;
     cpu_setFlags(&p_state ->cc, &p_state -> reg_a);
 
     if(cpu_checkMemOp(opcode)){
@@ -286,9 +307,25 @@ int op_XRA(CPUState* p_state, byte opcode){
     }
 }
 
+
+/*
+    ADD Register or Memory To Accumulator
+
+    The specified byte is added to the contents of the accumulator using two's complement arithmetic.
+
+    Condtion bits affected: Carry, Zero, Sign, Parity, Aux Carry
+*/
 int op_ADD(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
+
+    if(cpu_isAuxCarry(src, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
+    
+    
     uint16_t res = cpu_add(src, acc);
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
@@ -308,18 +345,47 @@ int op_ADD(CPUState* p_state, byte opcode){
 }
 
 
+
+/*
+    ADD Register or Memory to Accumulator With Carry
+
+    The specified byte plus the content of the Carry bit is added to the contents of the accumulator
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
 int op_ADC(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
-    
-    uint16_t res = cpu_add(src, acc) +  p_state -> cc.flag_cy;
+    byte carry = p_state -> cc.flag_cy;
 
+    // capture carry bit from: register/memory + accumulator + carry
+    uint16_t res = cpu_add(src, acc) +  carry;
+
+    // check for carry
     if((res >> 8) == 1){
         p_state -> cc.flag_cy = 1;
     }
     else{
         p_state -> cc.flag_cy = 0;
     }
+     
+    // add original carry bit to accumulator 
+    // (acc was only set to acc + reg/mem, 1 has not been added yet)
+    cpu_add(&carry, acc);
+
+
+    byte res_aux = res & 0x000f
+
+    if(cpu_isAuxCarry(src, acc)){
+        p_state -> cc.flag_ac = 1;
+    }
+    else{
+        if(cpu_isAuxCarry())
+    }
+    
+    
+
+    
 
     cpu_setFlags(&p_state -> cc, acc);
 

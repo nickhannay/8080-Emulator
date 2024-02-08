@@ -14,6 +14,18 @@ bool getParity(byte input){
     return ones & 1 == 0 ;
 }
 
+bool cpu_isAuxCarry(byte *src, byte *dst){
+    byte aux_res = (*src & 0x0f) + (*dst & 0x0f);
+    if((aux_res & 0x10) == 0x10){
+        return true;
+    }
+    else{
+        return false;
+    }
+
+
+}
+
 
 bool cpu_checkMemOp(byte opcode){
     return ((opcode & 0x07) == 0b110) || (((opcode >> 3 ) & 0x07) == 0b110);
