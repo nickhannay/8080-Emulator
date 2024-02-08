@@ -565,7 +565,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             p_state -> cc.flag_cy = MSB;
             p_state -> reg_a <<= 1;
             p_state -> reg_a |= (MSB >> 7);
-            
+
             break;
         case 0x01:
             // RRC
@@ -658,6 +658,21 @@ int op_INX(CPUState* p_state, byte opcode){
 
 
     deleteRegPair(rp);
+    return CYCLES(5);
+}
+
+
+
+int op_DCX(CPUState* p_state, byte opcode){
+    RegisterPair* rp = extractRegPair(p_state, opcode);
+    uint16_t combined = u8_to_u16(*rp -> high, *rp -> low);
+    combined -= 1;
+    *rp -> high = (combined & 0xff00 ) >> 8;
+    *rp -> low = combined & 0x00ff;
+
+
+    deleteRegPair(rp);
+
     return CYCLES(5);
 }
 
