@@ -565,6 +565,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             p_state -> cc.flag_cy = MSB;
             p_state -> reg_a <<= 1;
             p_state -> reg_a |= (MSB >> 7);
+            
             break;
         case 0x01:
             // RRC
@@ -572,12 +573,23 @@ int op_RAC(CPUState* p_state, byte opcode){
             p_state -> cc.flag_cy = LSB;
             p_state -> reg_a >>= 1;
             p_state -> reg_a |= (LSB << 7);
+
             break;
         case 0x10:
             // RAL
+            byte MSB = p_state -> reg_a & 0x80;
+            p_state -> reg_a <<= 1;
+            p_state -> reg_a |= p_state -> cc.flag_cy;
+            p_state -> cc.flag_cy = MSB;
+            
             break;
         case 0x11:
             // RAR
+            byte LSB = p_state -> reg_a & 0x01;
+            p_state -> reg_a >>= 1;
+            p_state -> reg_a |= (p_state -> cc.flag_cy << 7);
+            p_state -> cc.flag_cy = LSB;
+
             break;
     }
 
