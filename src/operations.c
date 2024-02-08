@@ -357,9 +357,12 @@ int op_ADC(CPUState* p_state, byte opcode){
     byte *src = extractReg(p_state, opcode);
     byte *acc = &p_state -> reg_a;
     byte carry = p_state -> cc.flag_cy;
+    byte aux_acc = *acc;
 
     // capture carry bit from: register/memory + accumulator + carry
-    uint16_t res = cpu_add(src, acc) +  carry;
+    uint16_t add_res = cpu_add(src, acc);
+
+    uint16_t res =  add_res +  carry;
 
     // check for carry
     if((res >> 8) == 1){
@@ -374,19 +377,21 @@ int op_ADC(CPUState* p_state, byte opcode){
     cpu_add(&carry, acc);
 
 
-    byte res_aux = res & 0x000f
 
-    if(cpu_isAuxCarry(src, acc)){
+
+    if(cpu_isAuxCarry(src, &aux_acc)){
         p_state -> cc.flag_ac = 1;
     }
     else{
-        if(cpu_isAuxCarry())
+        byte low_nib = add_res & 0x000f;
+        if(cpu_isAuxCarry(carry, &low_nib)){
+            p_state -> cc.flag_ac = 1;
+        }
+        else{
+            p_state -> cc.flag_ac = 0;
+        }
     }
     
-    
-
-    
-
     cpu_setFlags(&p_state -> cc, acc);
 
 
