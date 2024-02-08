@@ -53,6 +53,8 @@ int op_SUB(CPUState* p_state, byte opcode);
 
 int op_SBB(CPUState* p_state, byte opcode);
 
+int op_ORA(CPUState* p_state, byte opcode);
+
 int op_CMP(CPUState* p_state, byte opcode);
 
 

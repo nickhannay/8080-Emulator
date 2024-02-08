@@ -316,7 +316,7 @@ int op_XRA(CPUState* p_state, byte opcode){
     Condtion bits affected: Carry, Zero, Sign, Parity, Aux Carry
 */
 int op_ADD(CPUState* p_state, byte opcode){
-    byte *src = extractReg(p_state, opcode);
+    byte *src = extractReg(p_state, opcode << 3);
     byte *acc = &p_state -> reg_a;
 
     if(cpu_isAuxCarry(src, acc)){
@@ -353,7 +353,7 @@ int op_ADD(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
 */
 int op_ADC(CPUState* p_state, byte opcode){
-    byte *src = extractReg(p_state, opcode);
+    byte *src = extractReg(p_state, opcode << 3);
     byte *acc = &p_state -> reg_a;
     byte carry = p_state -> cc.flag_cy;
     byte aux_acc = *acc;
@@ -411,7 +411,7 @@ int op_ADC(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
 */
 int op_SUB(CPUState* p_state, byte opcode){
-    byte *reg = extractReg(p_state, opcode); 
+    byte *reg = extractReg(p_state, opcode << 3); 
     byte *acc = &p_state -> reg_a;
     byte twos_comp = (~*reg) + 1;
 
@@ -451,7 +451,7 @@ int op_SUB(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Zero, Sign, Parity, Aux Carry
 */
 int op_SBB(CPUState* p_state, byte opcode){
-    byte *reg = extractReg(p_state, opcode); 
+    byte *reg = extractReg(p_state, opcode << 3); 
     byte *acc = &p_state -> reg_a;
 
     byte twos_comp = ~(*reg + p_state -> cc.flag_cy) + 1;
@@ -484,10 +484,70 @@ int op_SBB(CPUState* p_state, byte opcode){
 
 
 /*
+    Logical or Register or Memory With Accumulator
 
+    The specified byte is logically ORed bit by bit with the contents of the accumulator. 
+    The carry bit is reset to zero.
+
+    Condition bits affected: Carry, Zero, Sign, Parity, Aux Carry
+*/
+int op_ORA(CPUState* p_state, byte opcode){
+    byte *reg = extractReg(p_state, opcode << 3);
+    p_state -> reg_a |=  *reg;
+
+    p_state -> cc.flag_ac = 0;
+    p_state -> cc.flag_cy = 0;
+
+    cpu_setFlags(p_state, &p_state -> reg_a);
+
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
+
+}
+
+
+/*
+    Compare Register or Memory With Accumulator
+
+    The specified byte is compared to the contents of the accumulator. 
+    The comparison is performed by internally subtracting the contents of REG 
+    from the accumulator (leaving both unchanged) and setting the condition bits according to the result
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
 */
 int op_CMP(CPUState* p_state, byte opcode){
+    // same as SUB, except Accumulator is left unchanged
+    byte *reg = extractReg(p_state, opcode << 3); 
+    byte *acc = &p_state -> reg_a;
+    byte twos_comp = (~*reg) + 1;
 
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
+
+
+    // no carry indicates presence of borrow, thus carry flag represents borrow
+    uint16_t res = (uint16_t) *acc + (uint16_t) twos_comp;
+    if((res & 0x0100) == 0x0100){
+        p_state -> cc.flag_cy = 0;
+    } else{
+        p_state -> cc.flag_ac = 1;
+    }
+
+    byte low_byte = res & 0x00ff;
+    cpu_setFlags(&p_state -> cc, &low_byte);
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
 
 }
 
