@@ -345,7 +345,6 @@ int op_ADD(CPUState* p_state, byte opcode){
 }
 
 
-
 /*
     ADD Register or Memory to Accumulator With Carry
 
@@ -391,7 +390,7 @@ int op_ADC(CPUState* p_state, byte opcode){
             p_state -> cc.flag_ac = 0;
         }
     }
-    
+
     cpu_setFlags(&p_state -> cc, acc);
 
 
@@ -404,7 +403,93 @@ int op_ADC(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Subtract Register or Memory from Accumulator
 
+    The specified byte is subtracted from the accumulator using two's complement arithmetic
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
+int op_SUB(CPUState* p_state, byte opcode){
+    byte *reg = extractReg(p_state, opcode); 
+    byte *acc = &p_state -> reg_a;
+    byte twos_comp = (~*reg) + 1;
+
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
+
+
+    // no carry indicates presence of borrow, thus carry flag represents borrow
+    uint16_t res = cpu_add(&twos_comp, acc);
+    if((res & 0x0100) == 0x0100){
+        p_state -> cc.flag_cy = 0;
+    } else{
+        p_state -> cc.flag_ac = 1;
+    }
+
+
+    cpu_setFlags(&p_state -> cc, acc);
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
+
+}
+
+
+/*
+    Subtract Register or Memory from Accumulator with Borrow
+
+    The Carry bit is internally added to the contents of the specified byte. 
+    This value is then subtracted from the accumulator using two's complement arithmetic
+
+    Condition bits affected: Carry, Zero, Sign, Parity, Aux Carry
+*/
+int op_SBB(CPUState* p_state, byte opcode){
+    byte *reg = extractReg(p_state, opcode); 
+    byte *acc = &p_state -> reg_a;
+
+    byte twos_comp = ~(*reg + p_state -> cc.flag_cy) + 1;
+
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
+
+
+    // no carry indicates presence of borrow, thus carry flag represents borrow
+    uint16_t res = cpu_add(&twos_comp, acc);
+    if((res & 0x0100) == 0x0100){
+        p_state -> cc.flag_cy = 0;
+    } else{
+        p_state -> cc.flag_ac = 1;
+    }
+
+
+    cpu_setFlags(&p_state -> cc, acc);
+
+    if(cpu_checkMemOp(opcode)){
+        return CYCLES(7);
+    } else{
+        return CYCLES(4);
+    }
+
+}
+
+
+/*
+
+*/
+int op_CMP(CPUState* p_state, byte opcode){
+
+
+}
 
 
 
