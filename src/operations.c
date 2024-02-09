@@ -824,6 +824,13 @@ int op_SPHL(CPUState *p_state){
 
 /* ****************************  IMMEDIATE INSTRUCTIONS ******************************* */
 
+/*
+    Move Immediate Data
+
+    The byte of immediate data is stored in the specified register or memory
+
+    Condition bits affected: None
+*/
 int op_MVI(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode); 
     *r = p_state -> memory[p_state -> pc];
@@ -836,10 +843,22 @@ int op_MVI(CPUState* p_state, byte opcode){
     }
 }
 
+/*
+    Add immeditate to Accumulator
 
+    The byte of immediate data is added to the contents of the Accumulator using two's complement arithmetic
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
 int op_ADI(CPUState* p_state, byte opcode){
     byte *immediate = &p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
+
+    if(cpu_isAuxCarry(immediate, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
 
     uint16_t res = cpu_add(immediate, acc);
     if((res >> 8) == 1){
@@ -855,7 +874,13 @@ int op_ADI(CPUState* p_state, byte opcode){
     return CYCLES(7);
 }
 
+/*
+    Compare Immediate with Accumulator 
 
+    The byte of immediate data is compared with the accumulator
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
 int op_CPI(CPUState* p_state, byte opcode){
     uint16_t immediate = p_state -> memory[p_state -> pc];
 
@@ -922,6 +947,15 @@ int op_LXI(CPUState* p_state, byte opcode){
     
     deleteRegPair(rp);
     return CYCLES(10); 
+}
+
+
+int op_ACI(CPUState* p_state, byte opcode){
+
+    int 
+
+
+    return 0;
 }
 
 

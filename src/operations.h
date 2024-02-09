@@ -95,6 +95,9 @@ int op_ANI(CPUState* p_state, byte opcode);
 
 int op_CPI(CPUState* p_state, byte opcode);
 
+int op_ACI(CPUState* p_state, byte opcode);
+
+
 
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
