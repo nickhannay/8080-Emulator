@@ -883,14 +883,20 @@ int op_ADI(CPUState* p_state, byte opcode){
 */
 int op_CPI(CPUState* p_state, byte opcode){
     uint16_t immediate = p_state -> memory[p_state -> pc];
+    byte *acc = &p_state -> reg_a;
+    byte twos_comp  = ~immediate + 1;
 
-    uint16_t twos_comp  = ~immediate + 1;
+    uint16_t cmp = (uint16_t) *acc + (uint16_t) twos_comp;
 
-    uint16_t cmp = p_state -> reg_a + twos_comp;
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else {
+        p_state -> cc.flag_ac = 0;
+    }
 
     if((immediate ^ p_state -> reg_a) & 0x80){
         // different sign
-        if((cmp & 0x10000) == 0x10000){
+        if((cmp & 0x0100) == 0x0100){
             // overflow
             p_state -> cc.flag_cy = 1;
         } else{
@@ -899,7 +905,7 @@ int op_CPI(CPUState* p_state, byte opcode){
         };
     } else{
         // same sign
-        if((cmp & 0x10000) == 0x10000){
+        if((cmp & 0x0100) == 0x0100){
             // overflow -> no borrow
             p_state -> cc.flag_cy = 0;
         } else{
@@ -952,7 +958,6 @@ int op_LXI(CPUState* p_state, byte opcode){
 
 int op_ACI(CPUState* p_state, byte opcode){
 
-    int 
 
 
     return 0;
