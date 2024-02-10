@@ -1093,12 +1093,61 @@ int op_SBI(CPUState* p_state, byte opcode){
 
 
     cpu_setFlags(&p_state -> cc, acc);
+
+    return CYCLES(7);
 }
 
 
 /*
+    Exclusive-Or Immediate With Accumulator
 
+    The byte of immediate data is EXCLUSIV E-ORed with the contents of the accumulator. The carry bit is set to zero
+
+    Condition bits affected: Carry, Zero, Sign, Parity
 */
+int op_XRI(CPUState* p_state, byte opcode){
+    byte *immediate = p_state->memory[p_state -> pc];
+    byte *acc = &p_state -> reg_a;
+
+    *acc ^= *immediate;
+
+    p_state -> cc.flag_cy = 0;
+    cpu_setFlags(&p_state -> cc, acc);
+
+
+    return CYCLES(7);
+}
+
+
+/*
+    Or Immediate With Accumulator
+
+    The byte of immediate data is logically ORed with the contents of the accumulator
+
+    Condition bits affected: Carry, Zero, Sign, Parity
+*/
+int op_ORI(CPUState* p_state, byte opcode){
+    byte *immediate = p_state->memory[p_state -> pc];
+    byte *acc = &p_state -> reg_a;
+
+    *acc |= *immediate;
+
+    p_state -> cc.flag_cy = 0;
+    cpu_setFlags(&p_state -> cc, acc);
+
+
+    return CYCLES(7);
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
