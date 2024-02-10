@@ -14,7 +14,7 @@ Emulator8080* emulator_init(){
     Emulator8080* emu = calloc(1, sizeof(Emulator8080));
     emu -> cpu = cpu_init();
     emu -> devices = devices_init();
-    emu -> display = display_init();
+    emu -> display = display_init(448, 512);
 
     return emu;
 }
