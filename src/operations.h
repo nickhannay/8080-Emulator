@@ -105,19 +105,25 @@ int op_XRI(CPUState* p_state, byte opcode);
 
 int op_ORI(CPUState* p_state, byte opcode);
 
-/* ****************************  JUMP INSTRUCTIONS ******************************* */
-
-int op_JNZ(CPUState* p_state, byte opcode);
-
-int op_JMP(CPUState* p_state, byte opcode);
-
-
 
 /* ****************************  DIRECT ADDRESSING INSTRUCTIONS ******************************* */
 
 int op_STA(CPUState* p_state, byte opcode);
 
 int op_LDA(CPUState* p_state, byte opcode);
+
+int op_SHLD(CPUState* p_state, byte opcode);
+
+int op_LHLD(CPUState* p_state, byte opcode);
+
+
+
+/* ****************************  JUMP INSTRUCTIONS ******************************* */
+
+int op_JNZ(CPUState* p_state, byte opcode);
+
+int op_JMP(CPUState* p_state, byte opcode);
+
 
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */

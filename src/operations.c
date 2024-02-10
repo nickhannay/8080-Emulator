@@ -1186,7 +1186,46 @@ int op_LDA(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Store H and L Direct
 
+    The contents of the L register are stored at the memory address formed by concatenati ng HI AD 0
+    with LOW ADO. The contents of the H register are stored at the next higher memory address
+
+    Condition bits affected: None
+*/
+int op_SHLD(CPUState* p_state, byte opcode){
+    byte hi = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state -> pc];
+
+    uint16_t addr = u8_to_u16(hi, low);
+    p_state -> memory[addr] = p_state -> reg_l;
+    p_state -> memory[addr + 1] = p_state -> reg_h;
+
+    return CYCLES(16);
+}
+
+
+
+/*
+    Load H and L Direct
+
+    The byte at the memory address formed by concatenating HI ADD with LOW ADD replaces the contents of the L register. The byte at the next higher memory
+    address replaces the contents of the H register
+
+    Condition bits affected: None
+*/
+int op_LHLD(CPUState* p_state, byte opcode){
+    byte hi = p_state -> memory[p_state -> pc + 1];
+    byte low = p_state -> memory[p_state -> pc];
+
+    byte addr = u8_to_u16(hi, low);
+    p_state -> reg_l = p_state -> memory[addr];
+    p_state -> reg_h = p_state -> memory[addr + 1];
+
+
+    return CYCLES(16);
+}
 
 
 
