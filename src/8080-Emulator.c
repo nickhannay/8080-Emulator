@@ -14,7 +14,7 @@ Emulator8080* emulator_init(){
     Emulator8080* emu = calloc(1, sizeof(Emulator8080));
     emu -> cpu = cpu_init();
     emu -> devices = devices_init();
-    emu -> display = display_init(448, 512);
+    emu -> display = display_init();
 
     return emu;
 }
@@ -34,6 +34,7 @@ void emulator_cleanup(Emulator8080* emu){
     cpu_cleanup(emu -> cpu);
     devices_cleanup(emu -> devices);
     display_cleanup(emu -> display);
+    exit(EXIT_SUCCESS);
 }
 
 
@@ -42,6 +43,8 @@ void emulator_cleanup(Emulator8080* emu){
 int emulator_start(Emulator8080* emu){
     struct timeval now;
     long long elapsed_usec, elapsed_cycles, elapsed_interrupt_usec = 0;
+    SDL_Event event;
+
     while(true) {
         gettimeofday(&now, NULL);
 
@@ -70,23 +73,42 @@ int emulator_start(Emulator8080* emu){
             switch(emu -> cpu -> int_type){
                 case HALF_SCREEN:
                     // ISR #1
+                    // both interrupts will have fully executed by now -> Draw Screen
 
-                    // draw screen 
+                    // convert 1bpp bitmap in VRAM into 32bpp bitmap for SDL
 
 
 
+                    SDL_RenderClear(emu -> display -> renderer);
+                    SDL_RenderPresent(emu -> display -> renderer);
+
+                    // execute interrupt
                     cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;
                     break;
                 case VBLANK:
                     // ISR #2
                     cpu_execute(emu -> cpu, 0xd7, emu -> devices);
-
                     emu -> cpu -> int_type = HALF_SCREEN;
                     break;
             }
+
+            // poll for input every half frame (8.33 ms)
+            if(SDL_PollEvent(&event)){
+                switch(event.type){
+                    case SDL_QUIT:
+                        printf("\nWindow Closed\n");
+                        emulator_cleanup(emu);
+                    default:
+                        // need to handle other input
+                }
+            }
             
         }
+
+        
+
+
         
     }
     
