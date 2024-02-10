@@ -11,6 +11,8 @@
 
 #define CYCLES(x) (x)
 
+typedef enum int_type{HALF_SCREEN, VBLANK} interrupt_type;
+
 struct ConditionCodes{
     byte    flag_z:1;
     byte    flag_s:1;
@@ -33,6 +35,8 @@ typedef struct CPUState {
     Memory  memory;
     struct      ConditionCodes cc;
     struct  timeval *tm;
+    struct  timeval *last_interrupt;
+    interrupt_type int_type;
     byte     int_enable;
 } CPUState;
 
