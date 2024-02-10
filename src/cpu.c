@@ -11,7 +11,7 @@ bool getParity(byte input){
         ones += ((input >> i ) & 1);
     }
 
-    return ones & 1 == 0 ;
+    return (ones & 1) == 0;
 }
 
 bool cpu_isAuxCarry(byte *src, byte *dst){
@@ -477,144 +477,164 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_ACI(p_state, opcode);
         break;
     case 0xcf:
+        // RST 1
+        op_unimplemented(opcode);
         break;
     case 0xd0:
+        cycles = op_RNC(p_state);
         break;
     case 0xd1:
         cycles = op_POP(p_state, opcode);
         break;
     case 0xd2:
-        p_state -> pc += 2;
+        cycles = op_JNC(p_state);
         break;
     case 0xd3:
         cycles = op_OUT(p_state, devices);
-        p_state -> pc += 1;
         break;
     case 0xd4:
-        p_state -> pc += 2;
+        cycles = op_CNC(p_state);
         break;
     case 0xd5:
         cycles = op_PUSH(p_state, opcode);
         break;
     case 0xd6:
-        
-        p_state -> pc += 2;
+        cycles = op_SUI(p_state, opcode);
         break;
     case 0xd7:
+        // RST 2
+        op_unimplemented(opcode);
         break;
     case 0xd8:
+        cycles = op_RC(p_state);
         break;
     case 0xd9:
         // not supported
+        op_unimplemented(opcode);
         break;
     case 0xda:
-        p_state -> pc += 2;
+        cycles = op_JC(p_state);
         break;
     case 0xdb:
         cycles = op_IN(p_state, devices);
-        p_state -> pc += 1;
         break;
     case 0xdc:
-        p_state -> pc += 2;
+        cycles = op_CC(p_state);
         break;
     case 0xdd:
         // not supported
+        op_unimplemented(opcode);
         break;
     case 0xde:
-        
-        p_state -> pc += 1;
+        cycles = op_SBI(p_state, opcode);
         break;
     case 0xdf:
+        // RST 3
+        op_unimplemented(opcode);
         break;
     case 0xe0:
+        cycles = op_RPO(p_state);
         break;
     case 0xe1:
         cycles = op_POP(p_state, opcode);
         break;
     case 0xe2:
-        p_state -> pc += 2;
+        cycles = op_JPO(p_state);
         break;
     case 0xe3:
+        cycles = op_XTHL(p_state);
         break;
     case 0xe4:
-        p_state -> pc += 2;
+        cycles = op_CPO(p_state);
         break;
     case 0xe5:
         cycles = op_PUSH(p_state, opcode);
         break;
     case 0xe6:
         cycles = op_ANI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0xe7:
+        // RST 4
+        op_unimplemented(opcode);
         break;
     case 0xe8:
+        cycles = op_RPE(p_state);
         break;
     case 0xe9:
+        cycles = op_PCHL(p_state);
         break;
     case 0xea:
-        p_state -> pc += 2;
+        cycles = op_JPE(p_state);
         break;
     case 0xeb:
         cycles = op_XCHG(p_state, opcode);
         break;
     case 0xec:
-        p_state -> pc += 2;
+        cycles = op_CPE(p_state);
         break;
     case 0xed:
         // not supported
+        op_unimplemented(opcode);
         break;
     case 0xee:
-        
-        p_state -> pc += 1;
+        cycles = op_XRI(p_state, opcode);
         break;
     case 0xef:
+        // RST 5
+        op_unimplemented(opcode);
         break;
     case 0xf0:
+        cycles = op_RP(p_state);
         break;
     case 0xf1:
         cycles = op_POP(p_state, opcode);
         break;
     case 0xf2:
-        p_state -> pc += 2;
+        cycles = op_JP(p_state);
         break;
     case 0xf3:
         // disable interrupts
         cycles = op_setI(p_state, 0);
         break;
     case 0xf4:
-        p_state -> pc += 2;
+        cycles = op_CP(p_state);
         break;
     case 0xf5:
         cycles = op_PUSH(p_state, opcode);
         break;
     case 0xf6:
-        
-        p_state -> pc += 1;
+        cycles = op_ORI(p_state, opcode);
         break;
     case 0xf7:
+        // RST 6
+        op_unimplemented(opcode);
         break;
     case 0xf8:
+        cycles = op_RM(p_state);
         break;
     case 0xf9:
+        cycles = op_SPHL(p_state);
         break;
     case 0xfa:
-        p_state -> pc += 2;
+        cycles = op_JM(p_state);
         break;
     case 0xfb:
         // Enable Interrupts
         cycles = op_setI(p_state, 1);
         break;
     case 0xfc:
-        p_state -> pc += 2;
+        cycles = op_CM(p_state);
         break;
     case 0xfd:
         // not supported
+        op_unimplemented(opcode);
         break;
     case 0xfe:
-        p_state -> pc += 1;
+        cycles = op_CPI(p_state, opcode);
         break;
     case 0xff:
+        // RST 7
+        op_unimplemented(opcode);
         break;
     }
 

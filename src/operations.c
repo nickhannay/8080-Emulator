@@ -377,7 +377,7 @@ int op_ADC(CPUState* p_state, byte opcode){
     }
     else{
         byte low_nib = add_res & 0x000f;
-        if(cpu_isAuxCarry(carry, &low_nib)){
+        if(cpu_isAuxCarry(&carry, &low_nib)){
             p_state -> cc.flag_ac = 1;
         }
         else{
@@ -492,7 +492,7 @@ int op_ORA(CPUState* p_state, byte opcode){
     p_state -> cc.flag_ac = 0;
     p_state -> cc.flag_cy = 0;
 
-    cpu_setFlags(p_state, &p_state -> reg_a);
+    cpu_setFlags(&p_state -> cc, &p_state -> reg_a);
 
 
     if(cpu_checkMemOp(opcode)){
@@ -566,10 +566,11 @@ int op_CMP(CPUState* p_state, byte opcode){
 
 int op_RAC(CPUState* p_state, byte opcode){
     byte op = opcode >> 3 & 0x03;
+    byte MSB, LSB = 0;
     switch(op){
         case 0x00:
             // RLC
-            byte MSB = p_state -> reg_a & 0x80;
+            MSB = p_state -> reg_a & 0x80;
             p_state -> cc.flag_cy = MSB;
             p_state -> reg_a <<= 1;
             p_state -> reg_a |= (MSB >> 7);
@@ -577,7 +578,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             break;
         case 0x01:
             // RRC
-            byte LSB = p_state -> reg_a & 0x01;
+            LSB = p_state -> reg_a & 0x01;
             p_state -> cc.flag_cy = LSB;
             p_state -> reg_a >>= 1;
             p_state -> reg_a |= (LSB << 7);
@@ -585,7 +586,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             break;
         case 0x10:
             // RAL
-            byte MSB = p_state -> reg_a & 0x80;
+            MSB = p_state -> reg_a & 0x80;
             p_state -> reg_a <<= 1;
             p_state -> reg_a |= p_state -> cc.flag_cy;
             p_state -> cc.flag_cy = MSB;
@@ -593,7 +594,7 @@ int op_RAC(CPUState* p_state, byte opcode){
             break;
         case 0x11:
             // RAR
-            byte LSB = p_state -> reg_a & 0x01;
+            LSB = p_state -> reg_a & 0x01;
             p_state -> reg_a >>= 1;
             p_state -> reg_a |= (p_state -> cc.flag_cy << 7);
             p_state -> cc.flag_cy = LSB;
@@ -930,7 +931,7 @@ int op_CPI(CPUState* p_state, byte opcode){
     byte res = (byte) cmp;
     cpu_setFlags(&p_state -> cc, &res);
 
-
+    p_state -> pc += 1;
     return CYCLES(7);
 }
 
@@ -949,6 +950,8 @@ int op_ANI(CPUState* p_state, byte opcode){
     p_state -> cc.flag_cy = 0;
 
     cpu_setFlags(&p_state->cc, &p_state->reg_a);
+
+    p_state -> pc += 1;
 
     return CYCLES(7);
 }
@@ -986,7 +989,7 @@ int op_LXI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, 
 */
 int op_ACI(CPUState* p_state, byte opcode){
-    byte *src = p_state -> memory[p_state -> pc];
+    byte *src = &p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
     byte carry = p_state -> cc.flag_cy;
     byte aux_acc = *acc;
@@ -1011,7 +1014,7 @@ int op_ACI(CPUState* p_state, byte opcode){
     }
     else{
         byte low_nib = add_res & 0x000f;
-        if(cpu_isAuxCarry(carry, &low_nib)){
+        if(cpu_isAuxCarry(&carry, &low_nib)){
             p_state -> cc.flag_ac = 1;
         }
         else{
@@ -1037,7 +1040,7 @@ int op_ACI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
 */
 int op_SUI(CPUState* p_state, byte opcode){
-    byte *immediate = p_state -> memory[p_state -> pc]; 
+    byte *immediate = &p_state -> memory[p_state -> pc]; 
     byte *acc = &p_state -> reg_a;
     byte twos_comp = (~*immediate) + 1;
 
@@ -1059,7 +1062,7 @@ int op_SUI(CPUState* p_state, byte opcode){
 
     cpu_setFlags(&p_state -> cc, acc);
 
-   
+   p_state -> pc += 1;
     return CYCLES(7);
 
 }
@@ -1073,7 +1076,7 @@ int op_SUI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
 */
 int op_SBI(CPUState* p_state, byte opcode){
-    byte *immediate = p_state -> memory[p_state -> pc]; 
+    byte *immediate = &p_state -> memory[p_state -> pc]; 
     byte *acc = &p_state -> reg_a;
 
     byte twos_comp = ~(*immediate + p_state -> cc.flag_cy) + 1;
@@ -1095,7 +1098,7 @@ int op_SBI(CPUState* p_state, byte opcode){
 
 
     cpu_setFlags(&p_state -> cc, acc);
-
+    p_state -> pc += 1;
     return CYCLES(7);
 }
 
@@ -1108,7 +1111,7 @@ int op_SBI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Zero, Sign, Parity
 */
 int op_XRI(CPUState* p_state, byte opcode){
-    byte *immediate = p_state->memory[p_state -> pc];
+    byte *immediate = &p_state->memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
 
     *acc ^= *immediate;
@@ -1116,7 +1119,7 @@ int op_XRI(CPUState* p_state, byte opcode){
     p_state -> cc.flag_cy = 0;
     cpu_setFlags(&p_state -> cc, acc);
 
-
+    p_state -> pc += 1;
     return CYCLES(7);
 }
 
@@ -1129,7 +1132,7 @@ int op_XRI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Zero, Sign, Parity
 */
 int op_ORI(CPUState* p_state, byte opcode){
-    byte *immediate = p_state->memory[p_state -> pc];
+    byte *immediate = &p_state->memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
 
     *acc |= *immediate;
@@ -1137,7 +1140,7 @@ int op_ORI(CPUState* p_state, byte opcode){
     p_state -> cc.flag_cy = 0;
     cpu_setFlags(&p_state -> cc, acc);
 
-
+    p_state -> pc += 1;
     return CYCLES(7);
 }
 
@@ -1870,6 +1873,7 @@ int op_OUT(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_write(device_id, p_state -> reg_a, devices);
 
+    p_state -> pc += 1;
     return CYCLES(10);
 }
 
@@ -1885,7 +1889,7 @@ int op_OUT(CPUState* p_state, Device* devices){
 int op_IN(CPUState* p_state, Device* devices){
     byte device_id = p_state -> memory[p_state -> pc];
     devices_read(device_id, &p_state -> reg_a, devices);
-
+    p_state -> pc += 1;
     return CYCLES(10);
 }
 
