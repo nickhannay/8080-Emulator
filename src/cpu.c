@@ -85,7 +85,6 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x01:
         cycles = op_LXI(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x02:
         cycles = op_STAX(p_state, opcode);
@@ -94,20 +93,20 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_INX(p_state, opcode);
         break;
     case 0x04:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x05:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x06:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x07:
-        op_unimplemented(opcode);
+        cycles = op_RAC(p_state, opcode);
         break;
     case 0x08:
         // unsupported
+        op_unimplemented(opcode);
         break;
     case 0x09:
         cycles = op_DAD(p_state, opcode);
@@ -116,27 +115,26 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_LDAX(p_state, opcode);
         break;
     case 0x0b:
-        op_unimplemented(opcode);
+        cycles = op_DCX(p_state, opcode);
         break;
     case 0x0c:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x0d:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x0e:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x0f:
         cycles = op_RAC(p_state, opcode);
         break;
     case 0x10:
         // unsupported
+        op_unimplemented(opcode);
         break;
     case 0x11:
         cycles = op_LXI(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x12:
         cycles = op_STAX(p_state, opcode);
@@ -145,20 +143,20 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_INX(p_state, opcode);
         break;
     case 0x14:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x15:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x16:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x17:
-        op_unimplemented(opcode);
+        cycles = op_RAC(p_state, opcode);
         break;
     case 0x18:
         // unsupported 
+        op_unimplemented(opcode);
         break;
     case 0x19:
         cycles = op_DAD(p_state, opcode);
@@ -167,125 +165,119 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_LDAX(p_state, opcode);
         break;
     case 0x1b:
-        op_unimplemented(opcode);
+        cycles = op_DCX(p_state, opcode);
         break;
     case 0x1c:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x1d:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x1e:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x1f:
-        op_unimplemented(opcode);
+        cycles = op_RAC(p_state, opcode);
         break;
     case 0x20:
+        // not supported
         op_unimplemented(opcode);
         break;
     case 0x21:
         cycles = op_LXI(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x22:
-        op_unimplemented(opcode);
-        p_state -> pc += 2;
+        cycles = op_SHLD(p_state, opcode);
         break;
     case 0x23:
         cycles = op_INX(p_state, opcode);
         break;
     case 0x24:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x25:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x26:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x27:
-        op_unimplemented(opcode);
+        cycles = op_DAA(p_state);
         break;
     case 0x28:
         // unsupported
+        op_unimplemented(opcode);
         break;
     case 0x29:
         cycles = op_DAD(p_state, opcode);
         break;
     case 0x2a:
-        p_state -> pc += 2;
+        cycles = op_LHLD(p_state, opcode);
         break;
     case 0x2b:
-        op_unimplemented(opcode);
+        cycles = op_DCX(p_state, opcode);
         break;
     case 0x2c:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x2d:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x2e:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x2f:
-        op_unimplemented(opcode);
+        cycles = op_CMA(p_state);
         break;
     case 0x30:
+        // not supported
         op_unimplemented(opcode);
         break;
     case 0x31:
         cycles = op_LXI(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x32:
         cycles = op_STA(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x33:
         cycles = op_INX(p_state, opcode);
         break;
     case 0x34:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x35:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x36:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x37:
-        op_unimplemented(opcode);
+        cycles = op_STC(p_state);
         break;
     case 0x38:
         // unsupported
+        op_unimplemented(opcode);
         break;
     case 0x39:
         cycles = op_DAD(p_state, opcode);
         break;
     case 0x3a:
         cycles = op_LDA(p_state, opcode);
-        p_state -> pc += 2;
         break;
     case 0x3b:
-        op_unimplemented(opcode);
+        cycles = op_DCX(p_state, opcode);
         break;
     case 0x3c:
-        op_unimplemented(opcode);
+        cycles = op_INR(p_state, opcode);
         break;
     case 0x3d:
         cycles = op_DCR(p_state, opcode);
         break;
     case 0x3e:
         cycles = op_MVI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0x3f:
-        op_unimplemented(opcode);
+        cycles = op_CMC(p_state);
         break;
     case 0x40:
     case 0x41:
@@ -344,7 +336,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_MOV(p_state, opcode);
         break;
     case 0x76:
-        op_unimplemented(opcode);
+        op_HLT();
         break;
     case 0x77:
     case 0x78:
@@ -378,36 +370,24 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_ADC(p_state, opcode);
         break;
     case 0x90:
-        break;
     case 0x91:
-        break;
     case 0x92:
-        break;
     case 0x93:
-        break;
     case 0x94:
-        break;
     case 0x95:
-        break;
     case 0x96:
-        break;
     case 0x97:
+        cycles = op_SUB(p_state, opcode);
         break;
     case 0x98:
-        break;
     case 0x99:
-        break;
     case 0x9a:
-        break;
     case 0x9b:
-        break;
     case 0x9c:
-        break;
     case 0x9d:
-        break;
     case 0x9e:
-        break;
     case 0x9f:
+        cycles = op_SBB(p_state, opcode);
         break;
     case 0xa0:
     case 0xa1:
@@ -430,38 +410,27 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_XRA(p_state, opcode);
         break;
     case 0xb0:
-        break;
     case 0xb1:
-        break;
     case 0xb2:
-        break;
     case 0xb3:
-        break;
     case 0xb4:
-        break;
     case 0xb5:
-        break;
     case 0xb6:
-        break;
     case 0xb7:
+        cycles = op_ORA(p_state, opcode);
         break;
     case 0xb8:
-        break;
     case 0xb9:
-        break;
     case 0xba:
-        break;
     case 0xbb:
-        break;
     case 0xbc:
-        break;
     case 0xbd:
-        break;
     case 0xbe:
-        break;
     case 0xbf:
+        cycles = op_CMP(p_state, opcode);
         break;
     case 0xc0:
+        cycles = op_RNZ(p_state);
         break;
     case 0xc1:
         cycles = op_POP(p_state, opcode);
@@ -473,37 +442,39 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_JMP(p_state);
         break;
     case 0xc4:
-        p_state -> pc += 2;
+        cycles = op_CNZ(p_state);
         break;
     case 0xc5:
         cycles = op_PUSH(p_state, opcode);
         break;
     case 0xc6:
         cycles = op_ADI(p_state, opcode);
-        p_state -> pc += 1;
         break;
     case 0xc7:
+        // RST
+        op_unimplemented(opcode);
         break;
     case 0xc8:
+        cycles = op_RZ(p_state);
         break;
     case 0xc9:
-        cycles = op_RET(p_state, opcode);
+        cycles = op_RET(p_state);
         break;
     case 0xca:
-        p_state -> pc += 2;
+        cycles = op_JZ(p_state);
         break;
     case 0xcb:
         // not supported
+        op_unimplemented(opcode);
         break;
     case 0xcc:
-        p_state -> pc += 2;
+        cycles = op_CZ(p_state);
         break;
     case 0xcd:
-        cycles = op_CALL(p_state, opcode);
+        cycles = op_CALL(p_state);
         break;
     case 0xce:
-        
-        p_state -> pc += 1;
+        cycles = op_ACI(p_state, opcode);
         break;
     case 0xcf:
         break;

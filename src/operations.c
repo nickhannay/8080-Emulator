@@ -846,7 +846,7 @@ int op_MVI(CPUState* p_state, byte opcode){
     byte* r = extractReg(p_state, opcode); 
     *r = p_state -> memory[p_state -> pc];
     
-
+    p_state -> pc += 1;
     if(cpu_checkMemOp(opcode)){
         return CYCLES(10);
     } else{
@@ -882,7 +882,7 @@ int op_ADI(CPUState* p_state, byte opcode){
 
     cpu_setFlags(&p_state->cc, acc);
 
-
+    p_state -> pc += 1;
     return CYCLES(7);
 }
 
@@ -972,6 +972,8 @@ int op_LXI(CPUState* p_state, byte opcode){
     }
     
     deleteRegPair(rp);
+    p_state -> pc += 2;
+
     return CYCLES(10); 
 }
 
@@ -1019,7 +1021,7 @@ int op_ACI(CPUState* p_state, byte opcode){
 
     cpu_setFlags(&p_state -> cc, acc);
 
-
+    p_state -> pc += 1;
     
     return CYCLES(7);
     
@@ -1166,6 +1168,8 @@ int op_STA(CPUState* p_state, byte opcode){
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> memory[addr] = p_state -> reg_a;
+
+    p_state -> pc += 2;
     return CYCLES(13);
 }
 
@@ -1182,6 +1186,8 @@ int op_LDA(CPUState* p_state, byte opcode){
 
     uint16_t addr = u8_to_u16(high, low);
     p_state -> reg_a = p_state -> memory[addr];
+
+    p_state -> pc += 2;
     return CYCLES(13);
 }
 
@@ -1201,6 +1207,8 @@ int op_SHLD(CPUState* p_state, byte opcode){
     uint16_t addr = u8_to_u16(hi, low);
     p_state -> memory[addr] = p_state -> reg_l;
     p_state -> memory[addr + 1] = p_state -> reg_h;
+
+    p_state -> pc += 2;
 
     return CYCLES(16);
 }
@@ -1223,6 +1231,7 @@ int op_LHLD(CPUState* p_state, byte opcode){
     p_state -> reg_l = p_state -> memory[addr];
     p_state -> reg_h = p_state -> memory[addr + 1];
 
+    p_state -> pc += 2;
 
     return CYCLES(16);
 }
@@ -1883,8 +1892,11 @@ int op_IN(CPUState* p_state, Device* devices){
 
 
 
-
-
+/* ****************************  HALT INSTRUCTIONS *************************** */
+void op_HLT(void){
+    printf("Halting Emulator\n");
+    exit(EXIT_SUCCESS);
+}
 
 
 
