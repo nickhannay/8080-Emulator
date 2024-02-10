@@ -1026,9 +1026,79 @@ int op_ACI(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Subtract Immediate From Accumulator
+
+    The byte of immediate data is subtracted from the contents of the accumulator using 
+    two's complement arithmetic
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
+int op_SUI(CPUState* p_state, byte opcode){
+    byte *immediate = p_state -> memory[p_state -> pc]; 
+    byte *acc = &p_state -> reg_a;
+    byte twos_comp = (~*immediate) + 1;
+
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
 
 
+    // no carry indicates presence of borrow, thus carry flag represents borrow
+    uint16_t res = cpu_add(&twos_comp, acc);
+    if((res & 0x0100) == 0x0100){
+        p_state -> cc.flag_cy = 0;
+    } else{
+        p_state -> cc.flag_ac = 1;
+    }
 
+
+    cpu_setFlags(&p_state -> cc, acc);
+
+   
+    return CYCLES(7);
+
+}
+
+
+/*
+    Subtract Immediate From Accumulator With Borrow
+
+    The Carry bit is internally added to the byte of immediate data. This value is then subtracted from the accumulator using two's complement arithmetic
+
+    Condition bits affected: Carry, Sign, Zero, Parity, Aux Carry
+*/
+int op_SBI(CPUState* p_state, byte opcode){
+    byte *immediate = p_state -> memory[p_state -> pc]; 
+    byte *acc = &p_state -> reg_a;
+
+    byte twos_comp = ~(*immediate + p_state -> cc.flag_cy) + 1;
+
+    if(cpu_isAuxCarry(&twos_comp, acc)){
+        p_state -> cc.flag_ac = 1;
+    } else{
+        p_state -> cc.flag_ac = 0;
+    }
+
+
+    // no carry indicates presence of borrow, thus carry flag represents borrow
+    uint16_t res = cpu_add(&twos_comp, acc);
+    if((res & 0x0100) == 0x0100){
+        p_state -> cc.flag_cy = 0;
+    } else{
+        p_state -> cc.flag_ac = 1;
+    }
+
+
+    cpu_setFlags(&p_state -> cc, acc);
+}
+
+
+/*
+
+*/
 
 
 

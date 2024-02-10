@@ -97,8 +97,13 @@ int op_CPI(CPUState* p_state, byte opcode);
 
 int op_ACI(CPUState* p_state, byte opcode);
 
+int op_SUI(CPUState* p_state, byte opcode);
 
+int op_SBI(CPUState* p_state, byte opcode);
 
+int op_XRI(CPUState* p_state, byte opcode);
+
+int op_ORI(CPUState* p_state, byte opcode);
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
 
