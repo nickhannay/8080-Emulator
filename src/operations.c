@@ -1238,7 +1238,30 @@ int op_LHLD(CPUState* p_state, byte opcode){
 
 
 
+
+
+
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
+
+/*
+    Load Program Counter
+
+    The contents of the H register replace the
+    most significant 8 bits of the program counter, and the contents of the L register replace the least significant 8 bits of
+    the program counter. This causes program execution to continue at the address contained in the Hand L registers.
+
+    Condition bits affected: None
+*/
+int op_PCHL(CPUState* p_state){
+
+    uint16_t addr = u8_to_u16(p_state -> reg_h, p_state -> reg_l);
+    p_state -> pc = addr;
+
+
+    return CYCLES(5);
+}
+
+
 
 /*
     Jump If Not Zero
@@ -1249,7 +1272,7 @@ int op_LHLD(CPUState* p_state, byte opcode){
 
     Condition bits affected: None
 */
-int op_JNZ(CPUState* p_state, byte opcode){
+int op_JNZ(CPUState* p_state){
     if(p_state -> cc.flag_z == 0){
         uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
         p_state -> pc = addr;
@@ -1270,13 +1293,143 @@ int op_JNZ(CPUState* p_state, byte opcode){
 
     Condtion bits affected: None
 */
-int op_JMP(CPUState* p_state, byte opcode){
+int op_JMP(CPUState* p_state){
     uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
     p_state -> pc = addr;
     return CYCLES(10);
 }
 
 
+/*
+    Jump If Carry
+
+    If the Carry bit is one, program execution conti nues at the memory address adr.
+
+    Condition bits affected: None
+*/
+int op_JC(CPUState* p_state){
+
+    if(p_state -> cc.flag_cy){
+        byte hi = p_state -> memory[p_state -> pc + 1];
+        byte low = p_state -> memory[p_state-> pc];
+        uint16_t addr = u8_to_u16(hi, low);
+        p_state-> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
+
+
+
+/*
+    Jump If No Carry
+
+    If the Carry bit is zero, program execution conti nues at the memory address adr.
+
+    Condition bits affected: None
+*/
+int op_JNC(CPUState* p_state){
+
+    if(p_state -> cc.flag_cy == 0){
+        byte hi = p_state -> memory[p_state -> pc + 1];
+        byte low = p_state -> memory[p_state-> pc];
+        uint16_t addr = u8_to_u16(hi, low);
+        p_state-> pc = addr;
+    } else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
+
+
+
+/*
+    Jump If Zero
+
+    If the zero bit is one, program execution continues at the memory address ad
+
+    Condition bits affected: None
+*/
+int op_JZ(CPUState* p_state){
+    if(p_state -> cc.flag_z == 1){
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
+
+
+/*
+    Jump If Minus
+
+    If the Sign bit is one (indicating a negative result), program execution continues at the memory
+    address adr
+
+    Condition bits affected: None
+*/
+int op_JM(CPUState* p_state){
+    if(p_state -> cc.flag_s){
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
+
+
+/*
+    Jump If Minus
+
+    If the Sign bit is zero (indicating a positive result), program execution continues at the memory
+    address adr
+
+    Condition bits affected: None
+*/
+int op_JP(CPUState* p_state){
+    if(p_state -> cc.flag_s == 0){
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
+
+
+
+
+/*
+    Jump If Parity Even
+
+    If the parity bit is one (indicating a result with even parity), program execution continues at the memory address adr.
+
+    Condition bits affected: None
+*/
+int op_JPE(CPUState* p_state){
+
+    if(p_state -> cc.flag_p){
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
 
 
 

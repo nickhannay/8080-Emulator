@@ -120,10 +120,23 @@ int op_LHLD(CPUState* p_state, byte opcode);
 
 /* ****************************  JUMP INSTRUCTIONS ******************************* */
 
-int op_JNZ(CPUState* p_state, byte opcode);
+int op_PCHL(CPUState* p_state);
 
-int op_JMP(CPUState* p_state, byte opcode);
+int op_JNZ(CPUState* p_state);
 
+int op_JMP(CPUState* p_state);
+
+int op_JNC(CPUState* p_state);
+
+int op_JC(CPUState* p_state);
+
+int op_JZ(CPUState* p_state);
+
+int op_JM(CPUState* p_state);
+
+int op_JP(CPUState* p_state);
+
+int op_JPE(CPUState* p_state);
 
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */

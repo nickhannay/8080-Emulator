@@ -467,10 +467,10 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_POP(p_state, opcode);
         break;
     case 0xc2:
-        cycles = op_JNZ(p_state, opcode);
+        cycles = op_JNZ(p_state);
         break;
     case 0xc3:
-        cycles = op_JMP(p_state, opcode);
+        cycles = op_JMP(p_state);
         break;
     case 0xc4:
         p_state -> pc += 2;
