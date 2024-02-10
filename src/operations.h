@@ -184,6 +184,10 @@ int op_RPE(CPUState *p_state);
 int op_RPO(CPUState *p_state);
 
 
+/* ****************************  RST INSTRUCTION   *************************** */
+int op_RST(CPUState *p_state, byte opcode);
+
+
 /* ****************************  INTERRUPT ENABLE/DISABLE INSTRUCTIONS *************************** */
 
 int op_setI(CPUState* p_state, byte toggle);

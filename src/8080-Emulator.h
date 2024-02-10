@@ -3,11 +3,13 @@
 
 #include "cpu.h"
 #include "devices.h"
+#include "display.h"
 
 
 typedef struct Emulator8080{
     CPUState* cpu;
     Device* devices;
+    Display* display;
 } Emulator8080;
 
 

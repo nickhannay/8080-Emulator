@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "operations.h"
 #include "Disassembler.h"
+#include <stdio.h>
 
 /*
    returns 1 if parity and 2 if parity is odd
@@ -458,7 +459,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         cycles = op_ADI(p_state, opcode);
         break;
     case 0xc7:
-        // RST
+        // RST 0
         op_unimplemented(opcode);
         break;
     case 0xc8:
@@ -485,7 +486,8 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xcf:
         // RST 1
-        op_unimplemented(opcode);
+        printf("RST 1\n");
+        cycles = op_RST(p_state, opcode);
         break;
     case 0xd0:
         cycles = op_RNC(p_state);
@@ -510,7 +512,8 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xd7:
         // RST 2
-        op_unimplemented(opcode);
+        printf("RST 2\n");
+        cycles = op_RST(p_state, opcode);
         break;
     case 0xd8:
         cycles = op_RC(p_state);

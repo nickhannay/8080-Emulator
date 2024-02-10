@@ -1827,6 +1827,28 @@ int op_RPO(CPUState *p_state){
 
 
 
+int op_RST(CPUState *p_state, byte opcode){
+    uint16_t isr_addr = 0x0038 & opcode;
+    byte low = p_state -> pc & 0x00ff;
+    byte hi = (p_state -> pc & 0xff00) >> 8;
+    printf("hi: %02x -- low: %02x -- pc: %02x\n", hi , low, p_state -> pc);
+
+    printf("%02x\n", opcode);
+    printf("ISR ADDR: %04x\n", isr_addr);
+
+    p_state -> memory[p_state -> sp - 1] = hi;
+    p_state -> memory[p_state -> sp - 2] = low;
+    p_state -> sp -= 2;
+
+    p_state -> pc = isr_addr;
+
+
+    return CYCLES(11);
+}
+
+
+
+
 
 
 /* ****************************  INTERRUPT ENABLE/DISABLE INSTRUCTIONS *************************** */
