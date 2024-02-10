@@ -360,7 +360,7 @@ int op_ADC(CPUState* p_state, byte opcode){
 
     // capture carry bit from: register/memory + accumulator + carry
     uint16_t add_res = cpu_add(src, acc);
-
+    cpu_add(&carry, acc);
     uint16_t res =  add_res +  carry;
 
     // check for carry
@@ -371,12 +371,6 @@ int op_ADC(CPUState* p_state, byte opcode){
         p_state -> cc.flag_cy = 0;
     }
      
-    // add original carry bit to accumulator 
-    // (acc was only set to acc + reg/mem, 1 has not been added yet)
-    cpu_add(&carry, acc);
-
-
-
 
     if(cpu_isAuxCarry(src, &aux_acc)){
         p_state -> cc.flag_ac = 1;
@@ -641,6 +635,7 @@ int op_DAD(CPUState* p_state, byte opcode){
 
 }
 
+
 /*
     Exchange Registers
 
@@ -662,6 +657,7 @@ int op_XCHG(CPUState* p_state, byte opcode){
 
     return CYCLES(4);
 }
+
 
 /*
     Increment Register Pair
@@ -740,6 +736,7 @@ int op_PUSH(CPUState* p_state, byte opcode){
 
     return CYCLES(11);
 }
+
 
 /*
     Pop Data Off Stack
@@ -843,6 +840,7 @@ int op_MVI(CPUState* p_state, byte opcode){
     }
 }
 
+
 /*
     Add immeditate to Accumulator
 
@@ -873,6 +871,7 @@ int op_ADI(CPUState* p_state, byte opcode){
 
     return CYCLES(7);
 }
+
 
 /*
     Compare Immediate with Accumulator 
@@ -923,7 +922,11 @@ int op_CPI(CPUState* p_state, byte opcode){
 
 
 /*
+    AND Immediate With Accumulator
+
     A bitwise AND operation is perfromed between the Accumulator and 1 byte of Immediate data
+
+    Condition bits affected: Carry, Zero, Sign, Parity
 */
 int op_ANI(CPUState* p_state, byte opcode){
 
@@ -936,7 +939,10 @@ int op_ANI(CPUState* p_state, byte opcode){
     return CYCLES(7);
 }
 
+
 /*
+    Load Immediate Data
+
     Loads 2 bytes of Immediate data into the register pair specefied.
 
     Condition bits affected: None
@@ -956,7 +962,22 @@ int op_LXI(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Add Immediate To Accumulator With Carry
+
+    The byte of immediate data is added to the contents of the accumulator plus the contents of the carry bit
+
+    Condition bits affected: Carry, Sign, Zero, 
+*/
 int op_ACI(CPUState* p_state, byte opcode){
+    byte *reg = extractReg(p_state, opcode);
+    byte *acc = &p_state -> reg_a;
+
+    byte carry = p_state -> cc.flag_cy;
+
+    uint16_t res = (uint16_t) *reg + (uint16_t) *acc + carry;
+
+    if(cpu_isAuxCarry(acc, reg) || cpu_isAuxCarry())
 
 
 
