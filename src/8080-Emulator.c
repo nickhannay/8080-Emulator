@@ -14,6 +14,7 @@ Emulator8080* emulator_init(){
     Emulator8080* emu = calloc(1, sizeof(Emulator8080));
     emu -> cpu = cpu_init();
     emu -> devices = devices_init();
+    emu -> display = display_init();
 
     return emu;
 }
@@ -32,6 +33,7 @@ int emulator_load(Emulator8080* emu, const char* file){
 void emulator_cleanup(Emulator8080* emu){
     cpu_cleanup(emu -> cpu);
     devices_cleanup(emu -> devices);
+    display_cleanup(emu -> display);
 }
 
 
@@ -69,12 +71,16 @@ int emulator_start(Emulator8080* emu){
                 case HALF_SCREEN:
                     // ISR #1
 
+                    // draw screen 
 
+
+
+                    cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;
                     break;
                 case VBLANK:
                     // ISR #2
-
+                    cpu_execute(emu -> cpu, 0xd7, emu -> devices);
 
                     emu -> cpu -> int_type = HALF_SCREEN;
                     break;

@@ -1,21 +1,26 @@
 
-#include <SDL2/SDL.h>
-#include <unistd.h>
 
-int main(){
+#include "display.h"
 
+#define DISPLAY_TITLE "Space Invaders"
+
+
+
+Display* display_init(int width, int height){
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ){
         perror("Failed to initialize video subsytem for SDL\n");
         exit(EXIT_FAILURE);
     }
+    Display* display = calloc(1, sizeof(Display));
 
-    SDL_Window* window = SDL_CreateWindow("Space Invaders", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 448, 512, 0);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    display -> window = SDL_CreateWindow(DISPLAY_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, 0);
+    display -> renderer = SDL_CreateRenderer(display -> window, -1, SDL_RENDERER_ACCELERATED);
 
-    sleep(10);
 
+
+}
+
+void display_cleanup(Display* display){
     SDL_Quit();
-
-
-    return 0;
+    free(display);
 }
