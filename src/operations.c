@@ -528,10 +528,24 @@ int op_CMP(CPUState* p_state, byte opcode){
 
     // no carry indicates presence of borrow, thus carry flag represents borrow
     uint16_t res = (uint16_t) *acc + (uint16_t) twos_comp;
-    if((res & 0x0100) == 0x0100){
-        p_state -> cc.flag_cy = 0;
+    if((*reg ^ p_state -> reg_a) & 0x80){
+        // different sign
+        if((res & 0x0100) == 0x0100){
+            // overflow
+            p_state -> cc.flag_cy = 1;
+        } else{
+            // no overflow
+            p_state -> cc.flag_cy = 0;
+        };
     } else{
-        p_state -> cc.flag_ac = 1;
+        // same sign
+        if((res & 0x0100) == 0x0100){
+            // overflow -> no borrow
+            p_state -> cc.flag_cy = 0;
+        } else{
+            // no overflow -> borrow
+            p_state -> cc.flag_cy = 1;
+        };
     }
 
     byte low_byte = res & 0x00ff;
@@ -970,19 +984,49 @@ int op_LXI(CPUState* p_state, byte opcode){
     Condition bits affected: Carry, Sign, Zero, 
 */
 int op_ACI(CPUState* p_state, byte opcode){
-    byte *reg = extractReg(p_state, opcode);
+    byte *src = p_state -> memory[p_state -> pc];
     byte *acc = &p_state -> reg_a;
-
     byte carry = p_state -> cc.flag_cy;
+    byte aux_acc = *acc;
 
-    uint16_t res = (uint16_t) *reg + (uint16_t) *acc + carry;
+    // capture carry bit from: immediate + accumulator + carry
+    uint16_t add_res = cpu_add(src, acc);
+    uint16_t res =  add_res +  carry;
+    cpu_add(&carry, acc);
+    
 
-    if(cpu_isAuxCarry(acc, reg) || cpu_isAuxCarry())
+    // check for carry
+    if((res >> 8) == 1){
+        p_state -> cc.flag_cy = 1;
+    }
+    else{
+        p_state -> cc.flag_cy = 0;
+    }
+     
+
+    if(cpu_isAuxCarry(src, &aux_acc)){
+        p_state -> cc.flag_ac = 1;
+    }
+    else{
+        byte low_nib = add_res & 0x000f;
+        if(cpu_isAuxCarry(carry, &low_nib)){
+            p_state -> cc.flag_ac = 1;
+        }
+        else{
+            p_state -> cc.flag_ac = 0;
+        }
+    }
+
+    cpu_setFlags(&p_state -> cc, acc);
 
 
-
-    return 0;
+    
+    return CYCLES(7);
+    
 }
+
+
+
 
 
 
