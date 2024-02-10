@@ -6,6 +6,8 @@
 #include "memory.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <sys/time.h>
+
 
 #define CYCLES(x) (x)
 
@@ -30,6 +32,7 @@ typedef struct CPUState {
     uint16_t    pc;
     Memory  memory;
     struct      ConditionCodes cc;
+    struct  timeval *tm;
     byte     int_enable;
 } CPUState;
 
