@@ -165,8 +165,23 @@ int op_CPO(CPUState* p_state);
 
 /* ****************************  RETURN FROM SUBROUTINE INSTRUCTIONS *************************** */
 
-int op_RET(CPUState* p_state, byte opcode);
+int op_RET(CPUState* p_state);
 
+int op_RC(CPUState *p_state);
+
+int op_RNC(CPUState *p_state);
+
+int op_RZ(CPUState *p_state);
+
+int op_RNZ(CPUState *p_state);
+
+int op_RP(CPUState *p_state);
+
+int op_RM(CPUState *p_state);
+
+int op_RPE(CPUState *p_state);
+
+int op_RPO(CPUState *p_state);
 
 
 /* ****************************  INTERRUPT ENABLE/DISABLE INSTRUCTIONS *************************** */

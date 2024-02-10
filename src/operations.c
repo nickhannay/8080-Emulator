@@ -1671,7 +1671,7 @@ int op_CPO(CPUState *p_state){
 
     Condition bits affected: None
 */
-int op_RET(CPUState* p_state, byte opcode){
+int op_RET(CPUState* p_state){
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
 
     p_state -> sp += 2;
@@ -1682,13 +1682,135 @@ int op_RET(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Return If Carry
+
+    If the Carry bit is one, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RC(CPUState *p_state){
+
+    if(p_state -> cc.flag_cy){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
 
 
+/*
+    Return If Not Carry
+
+    If the Carry bit is zero, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RNC(CPUState *p_state){
+
+    if(p_state -> cc.flag_cy == 0){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
+
+/*
+    Return If Zero
+
+    If the Zero bit is one, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RZ(CPUState *p_state){
+
+    if(p_state -> cc.flag_z){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
+
+/*
+    Return If Not Zero
+
+    If the Zero bit is zero, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RNZ(CPUState *p_state){
+
+    if(p_state -> cc.flag_z == 0){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
 
 
+/*
+    Return If Plus
 
+    If the sign bit is zero, a return operation is performed
 
+    Condition bits affected: None
+*/
+int op_RP(CPUState *p_state){
 
+    if(p_state -> cc.flag_s == 0){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
+
+/*
+    Return If Minus
+
+    If the Sign bit is one, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RM(CPUState *p_state){
+
+    if(p_state -> cc.flag_s){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
+
+/*
+    Return If Parity Even
+
+    If the Parity bit is one, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RPE(CPUState *p_state){
+
+    if(p_state -> cc.flag_p){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
+
+/*
+    Return If Parity Odd
+
+    If the Parity bit is zero, a return operation is performed
+
+    Condition bits affected: None
+*/
+int op_RPO(CPUState *p_state){
+
+    if(p_state -> cc.flag_p == 0){
+        return op_RET(p_state) + 1;
+    } else{
+        return CYCLES(5);
+    }
+}
 
 
 
