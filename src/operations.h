@@ -144,8 +144,23 @@ int op_JPO(CPUState* p_state);
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */
 
-int op_CALL(CPUState* p_state, byte opcode);
+int op_CALL(CPUState* p_state);
 
+int op_CC(CPUState* p_state);
+
+int op_CNC(CPUState* p_state);
+
+int op_CZ(CPUState* p_state);
+
+int op_CNZ(CPUState* p_state);
+
+int op_CM(CPUState* p_state);
+
+int op_CP(CPUState* p_state);
+
+int op_CPE(CPUState* p_state);
+
+int op_CPO(CPUState* p_state);
 
 
 /* ****************************  RETURN FROM SUBROUTINE INSTRUCTIONS *************************** */

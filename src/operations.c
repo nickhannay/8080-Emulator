@@ -1469,7 +1469,7 @@ int op_JPO(CPUState* p_state){
 
     Condition bits affected: None
 */
-int op_CALL(CPUState* p_state, byte opcode){
+int op_CALL(CPUState* p_state){
     // CALL addr
     uint16_t addr = u8_to_u16(p_state -> memory[p_state -> pc + 1], p_state -> memory[p_state -> pc] );
 
@@ -1492,6 +1492,164 @@ int op_CALL(CPUState* p_state, byte opcode){
 }
 
 
+/*
+    Call If Carry
+
+    A call operation is unconditionally performed to subroutine sub
+
+    Condition bits affected: None
+*/
+int op_CC(CPUState* p_state){
+
+    if(p_state -> cc.flag_cy){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+
+}
+
+
+
+/*
+    Call If No Carry
+
+    If the Carry bit is zero, a call operation is
+    performed to subroutine sub
+    
+    Condition bits affected: None
+*/
+int op_CNC(CPUState* p_state){
+
+    if(p_state -> cc.flag_cy == 0){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+}
+
+
+/*
+    Call If Zero
+
+    If the Zero bit is zero, a call operation is
+    performed to subroutine sub.
+
+    Condition bits affected: None
+*/
+int op_CZ(CPUState* p_state){
+    if(p_state -> cc.flag_z == 0){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+}
+
+/*
+    Call If Not Zero
+
+    If the Zero bit is zero, a call operation is
+    performed to subroutine sub.
+
+    Condition bits affected: None
+*/
+int op_CNZ(CPUState *p_state){
+    if(p_state -> cc.flag_z){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+}
+
+/*
+    Call If Minus
+
+    If the Sign bit is one (indicating a minus result), a call operation is performed to subrouti ne sub.
+
+    Condition bits affected: None
+*/
+int op_CM(CPUState *p_state){
+    if(p_state -> cc.flag_s){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+}
+
+
+/*
+    Call If Plus
+
+    If the Sign bit is zero (indicating a positive result), a call operation is performed to subrouti ne sub.
+
+    Condition bits affected: None
+*/
+int op_CP(CPUState *p_state){
+    if(p_state -> cc.flag_s == 0){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+}
+
+/*
+    Call If Parity Even
+
+    If the Parity bit is one (indicating even parity), a call operation is performed to subroutine sub
+
+    Condition bits affected: None
+*/
+int op_CPE(CPUState *p_state){
+
+    if(p_state -> cc.flag_p){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+
+}
+
+
+/*
+    Call If Parity Odd
+
+    If the Parity bit is zero (indicating odd parity), a call operation is performed to subroutine sub
+
+    Condition bits affected: None
+*/
+int op_CPO(CPUState *p_state){
+
+    if(p_state -> cc.flag_p == 0){
+
+        return op_CALL(p_state);
+
+    } else{
+        p_state -> pc += 2;
+        return CYCLES(11);
+    }
+
+}
 
 
 
@@ -1522,6 +1680,14 @@ int op_RET(CPUState* p_state, byte opcode){
 
     return CYCLES(10);
 }
+
+
+
+
+
+
+
+
 
 
 
