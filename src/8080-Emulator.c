@@ -60,10 +60,22 @@ int emulator_start(Emulator8080* emu){
         // check for interrupt
         elapsed_interrupt_usec = (now.tv_sec - emu -> cpu -> last_interrupt -> tv_sec ) * 1000000LL +
                                  (now.tv_usec - emu -> cpu -> last_interrupt -> tv_usec);
-        if(elapsed_interrupt_usec >= 16666){
+        if(elapsed_interrupt_usec >= 8333){
             // trigger interrupt
             emu -> cpu -> last_interrupt -> tv_sec = now.tv_sec;
             emu -> cpu -> last_interrupt -> tv_usec = now.tv_usec;
+
+            switch(emu -> cpu -> int_type){
+                case HALF_SCREEN:
+                    printf("Half Screen\n");
+                    emu -> cpu -> int_type = VBLANK;
+                    break;
+                case VBLANK:
+                    printf("VBLANK\n");
+                    emu -> cpu -> int_type = HALF_SCREEN;
+                    break;
+            }
+
             printf("interrupt triggered every %lli microseconds\n", elapsed_interrupt_usec);
             
         }

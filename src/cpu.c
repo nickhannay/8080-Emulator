@@ -59,6 +59,7 @@ CPUState* cpu_init(void){
     gettimeofday(p_state -> last_interrupt, NULL);
     p_state -> memory = memory_init();
 
+    p_state -> int_type = HALF_SCREEN;
     return p_state;
 
 }
