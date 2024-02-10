@@ -35,6 +35,8 @@ typedef struct CPUState {
 
 
 
+bool cpu_isAuxCarry(byte *src, byte* dst);
+
 bool getParity(byte input);
 
 void cpu_setFlags(struct ConditionCodes* cc,  byte* reg);
