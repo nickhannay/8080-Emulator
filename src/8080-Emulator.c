@@ -67,16 +67,18 @@ int emulator_start(Emulator8080* emu){
 
             switch(emu -> cpu -> int_type){
                 case HALF_SCREEN:
-                    printf("Half Screen\n");
+                    // ISR #1
+
+
                     emu -> cpu -> int_type = VBLANK;
                     break;
                 case VBLANK:
-                    printf("VBLANK\n");
+                    // ISR #2
+
+
                     emu -> cpu -> int_type = HALF_SCREEN;
                     break;
             }
-
-            printf("interrupt triggered every %lli microseconds\n", elapsed_interrupt_usec);
             
         }
         
