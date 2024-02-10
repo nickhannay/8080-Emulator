@@ -138,6 +138,9 @@ int op_JP(CPUState* p_state);
 
 int op_JPE(CPUState* p_state);
 
+int op_JPO(CPUState* p_state);
+
+
 
 /* ****************************  CALL SUBROUTINE INSTRUCTIONS *************************** */
 

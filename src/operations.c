@@ -1432,8 +1432,26 @@ int op_JPE(CPUState* p_state){
 }
 
 
+/*
+    Jump if Parity Odd
 
+    If the Parity bit is zero (indicating a result with odd parity), program execution conti nues at the
+    memory address adr.
 
+    Condition bits affected: None
+*/
+int op_JPO(CPUState* p_state){
+
+    if(p_state -> cc.flag_p == 0){
+        uint16_t addr = u8_to_u16(p_state->memory[p_state->pc + 1], p_state->memory[p_state->pc]);
+        p_state -> pc = addr;
+    }
+    else{
+        p_state -> pc += 2;
+    }
+
+    return CYCLES(10);
+}
 
 
 
