@@ -39,15 +39,15 @@ void emulator_cleanup(Emulator8080* emu){
 
 int emulator_start(Emulator8080* emu){
     struct timeval now;
-    long long elapsed_usec, elapsed_cycles = 0;
+    long long elapsed_usec, elapsed_cycles, elapsed_interrupt_usec = 0;
     while(true) {
         gettimeofday(&now, NULL);
 
+        
         elapsed_usec = (now.tv_sec - emu -> cpu -> tm -> tv_sec ) * 1000000LL +
                        (now.tv_usec - emu -> cpu -> tm -> tv_usec);
 
         elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
-
         int cycles_executed = 0;
         while (cycles_executed < elapsed_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
@@ -55,6 +55,17 @@ int emulator_start(Emulator8080* emu){
 
             cycles_executed += cpu_execute(emu -> cpu, opcode, emu -> devices);
 
+        }
+
+        // check for interrupt
+        elapsed_interrupt_usec = (now.tv_sec - emu -> cpu -> last_interrupt -> tv_sec ) * 1000000LL +
+                                 (now.tv_usec - emu -> cpu -> last_interrupt -> tv_usec);
+        if(elapsed_interrupt_usec >= 16666){
+            // trigger interrupt
+            emu -> cpu -> last_interrupt -> tv_sec = now.tv_sec;
+            emu -> cpu -> last_interrupt -> tv_usec = now.tv_usec;
+            printf("interrupt triggered every %lli microseconds\n", elapsed_interrupt_usec);
+            
         }
         
     }

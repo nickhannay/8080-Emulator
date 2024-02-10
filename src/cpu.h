@@ -33,6 +33,7 @@ typedef struct CPUState {
     Memory  memory;
     struct      ConditionCodes cc;
     struct  timeval *tm;
+    struct  timeval *last_interrupt;
     byte     int_enable;
 } CPUState;
 

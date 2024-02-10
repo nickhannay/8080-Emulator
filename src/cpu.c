@@ -54,7 +54,9 @@ uint16_t cpu_add(byte *src, byte *dst){
 CPUState* cpu_init(void){
     CPUState* p_state = calloc(1, sizeof(CPUState));
     p_state -> tm = calloc(1, sizeof(struct timeval));
+    p_state -> last_interrupt = calloc(1, sizeof(struct timeval));
     gettimeofday(p_state -> tm, NULL);
+    gettimeofday(p_state -> last_interrupt, NULL);
     p_state -> memory = memory_init();
 
     return p_state;
@@ -64,6 +66,7 @@ CPUState* cpu_init(void){
 int cpu_cleanup(CPUState* p_state){
     memory_cleanup(p_state -> memory);
     free(p_state -> tm);
+    free(p_state -> last_interrupt);
     free(p_state);
 
 
