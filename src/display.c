@@ -4,8 +4,8 @@
 
 const char* DISPLAY_TITLE = "Space Invaders";
 
-const size_t SCREEN_HEIGHT = 224;
-const size_t SCREEN_WIDTH = 256;
+const size_t SCREEN_HEIGHT = 512;
+const size_t SCREEN_WIDTH = 512;
 
 const size_t TEXTURE_HEIGHT = 224;
 const size_t TEXTURE_WIDTH = 256;
@@ -14,13 +14,14 @@ const uint16_t VRAM_START = 0x2400;
 const uint16_t VRAM_END = 0x3fff;
 
 Display* display_init(void){
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ){
         perror("Failed to initialize video subsytem for SDL\n");
         exit(EXIT_FAILURE);
     }
     Display* display = calloc(1, sizeof(Display));
 
-    display -> window = SDL_CreateWindow(DISPLAY_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    display -> window = SDL_CreateWindow(DISPLAY_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE);
     display -> renderer = SDL_CreateRenderer(display -> window, -1, SDL_RENDERER_ACCELERATED);
     SDL_SetRenderDrawColor(display -> renderer, 0, 0, 0, 0xff);
 
@@ -73,7 +74,7 @@ int display_renderFrame(Display* display){
     SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((uint32_t *)display -> converted_bitmap, TEXTURE_WIDTH,
                         TEXTURE_HEIGHT,
                         32,
-                        TEXTURE_WIDTH * 4,
+                        TEXTURE_WIDTH * sizeof(uint32_t),
                         0xff000000,
                         0x00ff0000,
                         0x0000ff00,
@@ -91,7 +92,7 @@ int display_renderFrame(Display* display){
 
 
     SDL_RenderClear(display -> renderer);
-    SDL_RenderCopyEx(display -> renderer, texture, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
+    SDL_RenderCopyEx(display -> renderer, texture, NULL, NULL, 270, NULL, SDL_FLIP_NONE);
     SDL_RenderPresent(display -> renderer);
 
     SDL_DestroyTexture(texture);
