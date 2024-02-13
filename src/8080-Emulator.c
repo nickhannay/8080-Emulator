@@ -77,10 +77,11 @@ int emulator_start(Emulator8080* emu){
                     printf("VBLANK\n");
                     // convert 1bpp bitmap in VRAM into 32bpp bitmap for SDL
                     display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
+                    printf("VBLANK2\n");
                     //display_dumpBitmap(emu -> display);
                     display_renderFrame(emu -> display);
 
-               
+                    printf("VBLANK3\n");
                     // execute interrupt
                     cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;

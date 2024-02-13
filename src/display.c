@@ -7,6 +7,9 @@ const char* DISPLAY_TITLE = "Space Invaders";
 const size_t SCREEN_HEIGHT = 224;
 const size_t SCREEN_WIDTH = 256;
 
+const size_t TEXTURE_HEIGHT = 224;
+const size_t TEXTURE_WIDTH = 256;
+
 const uint16_t VRAM_START = 0x2400;
 const uint16_t VRAM_END = 0x3fff;
 
@@ -37,12 +40,10 @@ int display_convertBitmap(CPUState* p_state, uint32_t *bitmap){
     for(uint32_t v_index = VRAM_START; v_index <= VRAM_END; v_index += 1){
         byte b = p_state -> memory[v_index];
         for(int i = 0; i < 8; i += 1){
-            byte px = (b << i) & 0x80;
-            if(px == 0x80){
-                
+            byte px = (b >> i) & 0x01;
+            if(px == 0x01){
                 bitmap[bitmap_index] = 0xffffffff;
             } else{
-                
                 bitmap[bitmap_index] = 0x000000ff;
             }
             bitmap_index += 1;
@@ -53,6 +54,10 @@ int display_convertBitmap(CPUState* p_state, uint32_t *bitmap){
 
     return 0;
 }
+
+
+
+
 
 int display_dumpBitmap(Display* d){
     int max = 256 * 224;
@@ -65,10 +70,10 @@ int display_dumpBitmap(Display* d){
 
 
 int display_renderFrame(Display* display){
-    SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((uint32_t *)display -> converted_bitmap, SCREEN_WIDTH,
-                        SCREEN_HEIGHT,
+    SDL_Surface *surface = SDL_CreateRGBSurfaceFrom((uint32_t *)display -> converted_bitmap, TEXTURE_WIDTH,
+                        TEXTURE_HEIGHT,
                         32,
-                        SCREEN_WIDTH * 4,
+                        TEXTURE_WIDTH * 4,
                         0xff000000,
                         0x00ff0000,
                         0x0000ff00,
@@ -86,7 +91,7 @@ int display_renderFrame(Display* display){
 
 
     SDL_RenderClear(display -> renderer);
-    SDL_RenderCopy(display -> renderer, texture, NULL, NULL);
+    SDL_RenderCopyEx(display -> renderer, texture, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
     SDL_RenderPresent(display -> renderer);
 
     SDL_DestroyTexture(texture);
