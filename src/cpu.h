@@ -13,6 +13,12 @@
 
 typedef enum int_type{HALF_SCREEN, VBLANK} interrupt_type;
 
+typedef enum{
+    FULL,
+    STACK,
+    VRAM,
+} Dump_Type;
+
 struct ConditionCodes{
     byte    flag_z:1;
     byte    flag_s:1;
@@ -40,7 +46,7 @@ typedef struct CPUState {
     byte     int_enable;
 } CPUState;
 
-
+void cpu_memoryDump(CPUState* p_state, Dump_Type type);
 
 bool cpu_isAuxCarry(byte *src, byte* dst);
 

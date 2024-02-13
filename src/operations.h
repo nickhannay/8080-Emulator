@@ -205,7 +205,7 @@ int op_IN(CPUState* p_state, Device* devices);
 void op_HLT(void);
 
 
-void op_unimplemented(byte opcode);
+void op_unimplemented(CPUState*p_state, byte opcode);
 
 
 #endif

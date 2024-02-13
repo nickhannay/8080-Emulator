@@ -56,7 +56,7 @@ int emulator_start(Emulator8080* emu){
         int cycles_executed = 0;
         while (cycles_executed < elapsed_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
-            printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1);
+            //printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1);
 
             cycles_executed += cpu_execute(emu -> cpu, opcode, emu -> devices);
 
@@ -74,14 +74,13 @@ int emulator_start(Emulator8080* emu){
                 case HALF_SCREEN:
                     // ISR #1
                     // both interrupts will have fully executed by now -> Draw Screen
-                    printf("VBLANK\n");
+
                     // convert 1bpp bitmap in VRAM into 32bpp bitmap for SDL
                     display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
-                    printf("VBLANK2\n");
+                    
                     //display_dumpBitmap(emu -> display);
                     display_renderFrame(emu -> display);
 
-                    printf("VBLANK3\n");
                     // execute interrupt
                     cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;
