@@ -117,6 +117,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     int cycles = 0;
     switch(opcode){
         case 0x00:
+        cycles = 4;
         // NOP
         break;
     case 0x01:
