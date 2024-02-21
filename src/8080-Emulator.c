@@ -43,6 +43,7 @@ void emulator_cleanup(Emulator8080* emu){
 int emulator_start(Emulator8080* emu){
     struct timeval now;
     long long elapsed_usec, elapsed_cycles, elapsed_interrupt_usec = 0;
+    uint64_t total_cycle_num = 0;
     SDL_Event event;
 
     while(true) {
@@ -51,15 +52,26 @@ int emulator_start(Emulator8080* emu){
         
         elapsed_usec = (now.tv_sec - emu -> cpu -> tm -> tv_sec ) * 1000000LL +
                        (now.tv_usec - emu -> cpu -> tm -> tv_usec);
-
-        elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
+        printf("elapsed usec %lld\n", elapsed_usec);
+        elapsed_cycles = elapsed_usec ;//* CYCLES_PER_USEC;
         int cycles_executed = 0;
-        while (cycles_executed < elapsed_cycles){
+        while (elapsed_cycles >= 5  && cycles_executed < elapsed_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
-            //printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1);
-
-            cycles_executed += cpu_execute(emu -> cpu, opcode, emu -> devices);
-
+            //printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1, total_cycle_num);
+            
+            int tmp = cpu_execute(emu -> cpu, opcode, emu -> devices);
+            if(exec_int){
+                printf("total cycles: %lu\n", total_cycle_num);
+                //sleep(3);
+                display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
+                //printf("TANK\n");
+                //display_dumpBitmap(emu -> display);
+                display_renderFrame(emu -> display);
+                //sleep(10);
+                exit(0);
+            }
+            cycles_executed += tmp;
+            total_cycle_num += tmp;
         }
 
         // check for interrupt
@@ -72,6 +84,7 @@ int emulator_start(Emulator8080* emu){
 
             switch(emu -> cpu -> int_type){
                 case HALF_SCREEN:
+                    //printf("ISR #1 (Half Screen)\n");
                     // ISR #1
                     // both interrupts will have fully executed by now -> Draw Screen
 
@@ -81,12 +94,18 @@ int emulator_start(Emulator8080* emu){
                     //display_dumpBitmap(emu -> display);
                     display_renderFrame(emu -> display);
 
+                    /*if(pause_next_int){
+                        sleep(10);
+                        exit(0);
+                    }*/
+
                     // execute interrupt
                     cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;
                     break;
                 case VBLANK:
                     // ISR #2
+                    //printf("ISR #2 (VBLANK)\n");
                     cpu_execute(emu -> cpu, 0xd7, emu -> devices);
                     emu -> cpu -> int_type = HALF_SCREEN;
                     break;
