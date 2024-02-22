@@ -20,8 +20,8 @@ Emulator8080* emulator_init(){
 }
 
 
-int emulator_load(Emulator8080* emu, const char* file){
-    int fd = open(file, O_RDONLY);
+int emulator_load_ROM(Emulator8080* emu, const char* ROM_file){
+    int fd = open(ROM_file, O_RDONLY);
     int bytes_read = read(fd, emu -> cpu -> memory, MEM_SIZE);
 
     close(fd);
@@ -42,70 +42,46 @@ void emulator_cleanup(Emulator8080* emu){
 
 int emulator_start(Emulator8080* emu){
     struct timeval now;
-    long long elapsed_usec, elapsed_cycles, elapsed_interrupt_usec = 0;
-    uint64_t total_cycle_num = 0;
+    long long elapsed_usec = 0;
+    long long  elapsed_cycles, elapsed_interrupt_cycles = 0;
+    long long total_interrupts_count, total_cycle_count = 0;
     SDL_Event event;
 
+    gettimeofday(emu -> cpu -> tm, NULL);
     while(true) {
         gettimeofday(&now, NULL);
-
-        
         elapsed_usec = (now.tv_sec - emu -> cpu -> tm -> tv_sec ) * 1000000LL +
                        (now.tv_usec - emu -> cpu -> tm -> tv_usec);
-        printf("elapsed usec %lld\n", elapsed_usec);
-        elapsed_cycles = elapsed_usec ;//* CYCLES_PER_USEC;
+
+        //printf("elapsed usec %lld\n", elapsed_usec);
+        elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
         int cycles_executed = 0;
         while (elapsed_cycles >= 5  && cycles_executed < elapsed_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
             //printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1, total_cycle_num);
-            
-            int tmp = cpu_execute(emu -> cpu, opcode, emu -> devices);
-            if(exec_int){
-                printf("total cycles: %lu\n", total_cycle_num);
-                //sleep(3);
-                display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
-                //printf("TANK\n");
-                //display_dumpBitmap(emu -> display);
-                display_renderFrame(emu -> display);
-                //sleep(10);
-                exit(0);
-            }
-            cycles_executed += tmp;
-            total_cycle_num += tmp;
+            int cycles = cpu_execute(emu -> cpu, opcode, emu -> devices);
+
+            cycles_executed += cycles;
+            total_cycle_count += cycles;
+            elapsed_interrupt_cycles += cycles;
         }
 
-        // check for interrupt
-        elapsed_interrupt_usec = (now.tv_sec - emu -> cpu -> last_interrupt -> tv_sec ) * 1000000LL +
-                                 (now.tv_usec - emu -> cpu -> last_interrupt -> tv_usec);
-        if(elapsed_interrupt_usec >= 8333){
-            // trigger interrupt
-            emu -> cpu -> last_interrupt -> tv_sec = now.tv_sec;
-            emu -> cpu -> last_interrupt -> tv_usec = now.tv_usec;
-
+        // trigger interrupt every 16666 cycles (8333 usec)
+        if(elapsed_interrupt_cycles >= 16666){
+            elapsed_interrupt_cycles = 0;
             switch(emu -> cpu -> int_type){
+                // ISR #1 (0x08)
                 case HALF_SCREEN:
-                    //printf("ISR #1 (Half Screen)\n");
-                    // ISR #1
                     // both interrupts will have fully executed by now -> Draw Screen
-
-                    // convert 1bpp bitmap in VRAM into 32bpp bitmap for SDL
                     display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
-                    
                     //display_dumpBitmap(emu -> display);
                     display_renderFrame(emu -> display);
 
-                    /*if(pause_next_int){
-                        sleep(10);
-                        exit(0);
-                    }*/
-
-                    // execute interrupt
                     cpu_execute(emu -> cpu, 0xcf, emu -> devices);
                     emu -> cpu -> int_type = VBLANK;
                     break;
+                // ISR #2 (0x10)
                 case VBLANK:
-                    // ISR #2
-                    //printf("ISR #2 (VBLANK)\n");
                     cpu_execute(emu -> cpu, 0xd7, emu -> devices);
                     emu -> cpu -> int_type = HALF_SCREEN;
                     break;
@@ -115,20 +91,16 @@ int emulator_start(Emulator8080* emu){
             if(SDL_PollEvent(&event)){
                 switch(event.type){
                     case SDL_QUIT:
-                        printf("\nWindow Closed\n");
+                        printf("\nCycles Executed: %lld\nNumber of Interrupts Handled: %lld\n", total_cycle_count, total_interrupts_count);
                         emulator_cleanup(emu);
                     default:
-                        // need to handle other input
+                        // need to handle other window events
                 }
             }
-            
+            total_interrupts_count += 1;
         }
 
-        
-
-
-        
     }
-    
+
     return 0;
 }
