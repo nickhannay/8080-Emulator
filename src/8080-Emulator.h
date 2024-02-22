@@ -19,6 +19,8 @@ Emulator8080* emulator_init();
 
 int emulator_load_ROM(Emulator8080* emu, const char* file);
 
+void emulator_throw_interrupt(Emulator8080* emu, long long *elapsed_interrupt_cycles, long long *frames);
+
 int emulator_start(Emulator8080* emu);
 
 void emulator_cleanup(Emulator8080* emu);

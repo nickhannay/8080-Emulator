@@ -25,7 +25,6 @@ int emulator_load_ROM(Emulator8080* emu, const char* ROM_file){
     int bytes_read = read(fd, emu -> cpu -> memory, MEM_SIZE);
 
     close(fd);
-
     return bytes_read;
 }
 
@@ -38,26 +37,49 @@ void emulator_cleanup(Emulator8080* emu){
 }
 
 
+void emulator_throw_interrupt(Emulator8080* emu, long long *elapsed_interrupt_cycles, long long *frames){
+    // trigger interrupt every 8333 usec (120Hz)
+    *elapsed_interrupt_cycles = 0;
+    switch(emu -> cpu -> int_type){
+        // ISR #1 (0x08)
+        case HALF_SCREEN:
+            cpu_execute(emu -> cpu, 0xcf, emu -> devices);
+            emu -> cpu -> int_type = VBLANK;
+            break;
+        // ISR #2 (0x10)
+        case VBLANK:
+            // both interrupts will have fully executed by now -> Draw Screen
+            display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
+            //display_dumpBitmap(emu -> display);
+            display_renderFrame(emu -> display);
+
+            *frames += 1;
+            cpu_execute(emu -> cpu, 0xd7, emu -> devices);
+            emu -> cpu -> int_type = HALF_SCREEN;
+            break;
+    }
+
+    return;
+}
+
+
 
 
 int emulator_start(Emulator8080* emu){
     struct timeval now;
-    long long elapsed_usec = 0;
-    long long  elapsed_cycles, elapsed_interrupt_cycles = 0;
-    long long total_interrupts_count, total_cycle_count, frames = 0;
-    long long prev_instruction_cycles;
+    long long total_interrupts_count = 0, frames = 0;
     SDL_Event event;
 
     byte opcode = cpu_fetch(emu -> cpu);
-    prev_instruction_cycles = cpu_execute(emu -> cpu, opcode, emu -> devices);
-    elapsed_interrupt_cycles = prev_instruction_cycles;
-    total_cycle_count = prev_instruction_cycles;
+    long long prev_instruction_cycles = cpu_execute(emu -> cpu, opcode, emu -> devices);
+    long long elapsed_interrupt_cycles = prev_instruction_cycles;
+    long long total_cycle_count = prev_instruction_cycles;
     while(true) {
         gettimeofday(&now, NULL);
-        elapsed_usec = (now.tv_sec - emu -> cpu -> tm -> tv_sec ) * 1000000LL +
-                       (now.tv_usec - emu -> cpu -> tm -> tv_usec);
-        //printf("elapsed usec %lld\n", elapsed_usec);
-        elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
+        long long elapsed_usec = (now.tv_sec - emu -> cpu -> tm -> tv_sec ) * 1000000LL
+                                +(now.tv_usec - emu -> cpu -> tm -> tv_usec);
+
+        long long elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
         if(elapsed_cycles >= prev_instruction_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
             prev_instruction_cycles = cpu_execute(emu -> cpu, opcode, emu -> devices);
@@ -66,26 +88,9 @@ int emulator_start(Emulator8080* emu){
 
             // check for interrupt 
             if(elapsed_interrupt_cycles >= 16666){
-                // trigger interrupt every 8333 usec (120Hz)
-                elapsed_interrupt_cycles = 0;
-                switch(emu -> cpu -> int_type){
-                    // ISR #1 (0x08)
-                    case HALF_SCREEN:
-                        cpu_execute(emu -> cpu, 0xcf, emu -> devices);
-                        emu -> cpu -> int_type = VBLANK;
-                        break;
-                    // ISR #2 (0x10)
-                    case VBLANK:
-                        // both interrupts will have fully executed by now -> Draw Screen
-                        display_convertBitmap(emu -> cpu, emu -> display -> converted_bitmap);
-                        //display_dumpBitmap(emu -> display);
-                        display_renderFrame(emu -> display);
-
-                        frames += 1;
-                        cpu_execute(emu -> cpu, 0xd7, emu -> devices);
-                        emu -> cpu -> int_type = HALF_SCREEN;
-                        break;
-                }
+                
+                total_interrupts_count += 1;
+                emulator_throw_interrupt(emu, &elapsed_interrupt_cycles, &frames);
 
                 // Handle window events
                 if(SDL_PollEvent(&event)){
@@ -97,7 +102,6 @@ int emulator_start(Emulator8080* emu){
                             // need to handle other window events
                     }
                 }
-                total_interrupts_count += 1;
 
             }
         }
