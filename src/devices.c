@@ -12,7 +12,6 @@ uint16_t shift_reg = 0;
 
 void write_dev2(byte value){
     shift_offset = value & 0x07;
-    printf("offset = %d\n", shift_offset);
 
     //printf("writing %02x to PORT: 2 - shift offset = %d\n", value, shift_offset);
     return;
