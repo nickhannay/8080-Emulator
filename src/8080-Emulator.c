@@ -56,7 +56,7 @@ int emulator_start(Emulator8080* emu){
         //printf("elapsed usec %lld\n", elapsed_usec);
         elapsed_cycles = elapsed_usec * CYCLES_PER_USEC;
         int cycles_executed = 0;
-        while (elapsed_cycles >= 5  && cycles_executed < elapsed_cycles){
+        while (elapsed_cycles >= 17  && cycles_executed < elapsed_cycles){
             byte opcode = cpu_fetch(emu -> cpu);
             //printOpCode(emu -> cpu -> memory, emu -> cpu -> pc - 1, total_cycle_num);
             int cycles = cpu_execute(emu -> cpu, opcode, emu -> devices);

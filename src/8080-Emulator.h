@@ -17,7 +17,7 @@ typedef struct Emulator8080{
 
 Emulator8080* emulator_init();
 
-int emulator_load(Emulator8080* emu, const char* file);
+int emulator_load_ROM(Emulator8080* emu, const char* file);
 
 int emulator_start(Emulator8080* emu);
 
