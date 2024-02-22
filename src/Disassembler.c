@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <inttypes.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdint.h>
@@ -12,17 +13,17 @@
 int processBuffer(byte codes[], int buffer_size){
     int index = 0;
     while (index < buffer_size){
-        index += printOpCode(codes, index);
+        index += printOpCode(codes, index , 0);
     }
     return index;
 }
 
 
 
-int printOpCode(byte codes[], int index){
+int printOpCode(byte codes[], int index, uint64_t cycle_num){
     int opcodeSize = 1;
     char* unsupported = "OPCODE NOT SUPPORTED";
-    printf("%04x  ", index);
+    printf("total cycles executed: %lu - %04x  ",cycle_num, index);
 	switch (codes[index]) {
     case 0x00:
         printf("NOP\n");

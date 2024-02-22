@@ -1684,7 +1684,10 @@ int op_CPO(CPUState *p_state){
     Condition bits affected: None
 */
 int op_RET(CPUState* p_state){
-    uint16_t addr = u8_to_u16(p_state -> memory[p_state -> sp  + 1], p_state -> memory[p_state -> sp]);
+    byte hi = p_state -> memory[p_state -> sp  + 1];
+    byte low = p_state -> memory[p_state -> sp];
+    //printf("RET \n\tSP: %04x - Hi: %02x - Low: %02x\n", p_state -> sp, hi, low);
+    uint16_t addr = u8_to_u16(hi, low);
 
     p_state -> sp += 2;
 
@@ -1831,10 +1834,10 @@ int op_RST(CPUState *p_state, byte opcode){
     uint16_t isr_addr = 0x0038 & opcode;
     byte low = p_state -> pc & 0x00ff;
     byte hi = (p_state -> pc & 0xff00) >> 8;
-    printf("hi: %02x -- low: %02x -- pc: %02x\n", hi , low, p_state -> pc);
+    //printf("hi: %02x -- low: %02x -- pc: %02x\n", hi , low, p_state -> pc);
 
-    printf("%02x\n", opcode);
-    printf("ISR ADDR: %04x\n", isr_addr);
+    //printf("%02x\n", opcode);
+    //printf("ISR ADDR: %04x\n", isr_addr);
 
     p_state -> memory[p_state -> sp - 1] = hi;
     p_state -> memory[p_state -> sp - 2] = low;
@@ -1926,7 +1929,8 @@ void op_HLT(void){
 
 
 
-void op_unimplemented(byte opcode){
+void op_unimplemented(CPUState* p_state, byte opcode){
+    cpu_memoryDump(p_state, STACK);
     fprintf(stderr, "INSTRUCTION %02x has not been implemented\n", opcode);
     exit(EXIT_FAILURE);
 }

@@ -3,6 +3,10 @@
 #include "Disassembler.h"
 #include <stdio.h>
 
+
+
+
+
 /*
    returns 1 if parity and 2 if parity is odd
 */
@@ -50,7 +54,31 @@ uint16_t cpu_add(byte *src, byte *dst){
 }
 
 
+void cpu_memoryDump(CPUState* p_state, Dump_Type type){
+    int start_i, end_i = 0;
+    switch (type)
+    {
+    case STACK:
+        start_i = 0x23ff;
+        end_i = 0x2000;
+        printf("Stack Pointer: %04x\n", p_state -> sp);
+        while(start_i >= end_i){
+            printf("[%04x]: %02x\n", start_i, p_state->memory[start_i]);
+            start_i -= 1;
+        }
+        break;
+    
 
+    case VRAM:
+
+        break;
+    default:
+        // full
+        break;
+    }
+
+    
+}
 
 CPUState* cpu_init(void){
     CPUState* p_state = calloc(1, sizeof(CPUState));
@@ -89,6 +117,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
     int cycles = 0;
     switch(opcode){
         case 0x00:
+        cycles = 4;
         // NOP
         break;
     case 0x01:
@@ -114,7 +143,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x08:
         // unsupported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x09:
         cycles = op_DAD(p_state, opcode);
@@ -139,7 +168,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x10:
         // unsupported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x11:
         cycles = op_LXI(p_state, opcode);
@@ -164,7 +193,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x18:
         // unsupported 
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x19:
         cycles = op_DAD(p_state, opcode);
@@ -189,7 +218,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x20:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x21:
         cycles = op_LXI(p_state, opcode);
@@ -214,7 +243,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x28:
         // unsupported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x29:
         cycles = op_DAD(p_state, opcode);
@@ -239,7 +268,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x30:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x31:
         cycles = op_LXI(p_state, opcode);
@@ -264,7 +293,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0x38:
         // unsupported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0x39:
         cycles = op_DAD(p_state, opcode);
@@ -460,7 +489,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xc7:
         // RST 0
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xc8:
         cycles = op_RZ(p_state);
@@ -473,7 +502,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xcb:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xcc:
         cycles = op_CZ(p_state);
@@ -486,7 +515,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xcf:
         // RST 1
-        printf("RST 1\n");
+        //printf("RST 1\n");
         cycles = op_RST(p_state, opcode);
         break;
     case 0xd0:
@@ -512,7 +541,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xd7:
         // RST 2
-        printf("RST 2\n");
+        //printf("RST 2\n");
         cycles = op_RST(p_state, opcode);
         break;
     case 0xd8:
@@ -520,7 +549,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xd9:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xda:
         cycles = op_JC(p_state);
@@ -533,14 +562,14 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xdd:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xde:
         cycles = op_SBI(p_state, opcode);
         break;
     case 0xdf:
         // RST 3
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xe0:
         cycles = op_RPO(p_state);
@@ -565,7 +594,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xe7:
         // RST 4
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xe8:
         cycles = op_RPE(p_state);
@@ -584,14 +613,14 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xed:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xee:
         cycles = op_XRI(p_state, opcode);
         break;
     case 0xef:
         // RST 5
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xf0:
         cycles = op_RP(p_state);
@@ -617,7 +646,7 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xf7:
         // RST 6
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xf8:
         cycles = op_RM(p_state);
@@ -637,14 +666,14 @@ int cpu_execute(CPUState* p_state, byte opcode, Device* devices){
         break;
     case 0xfd:
         // not supported
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     case 0xfe:
         cycles = op_CPI(p_state, opcode);
         break;
     case 0xff:
         // RST 7
-        op_unimplemented(opcode);
+        op_unimplemented(p_state, opcode);
         break;
     }
 

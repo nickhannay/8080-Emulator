@@ -6,7 +6,7 @@
 
 typedef struct Device{
     void (*write)(byte);
-    void (*read)();
+    void (*read)(byte *);
 }Device;
 
 
